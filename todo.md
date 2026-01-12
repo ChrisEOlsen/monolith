@@ -10,3 +10,6 @@
             - Consider using Jinja2 templates for dynamic Traefik configuration (e.g., domain names).
         - Ensure `APP_ENV` is set to `prod`.
         - Build production assets (CSS).
+
+- [ ] Create a new mcp tool that logs features that have been added (features should be easily removable)
+- [ ] Create an mcp tool that generates documentation for new features as they pop up.
