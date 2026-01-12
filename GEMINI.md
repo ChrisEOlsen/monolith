@@ -80,6 +80,8 @@ Add this to your client (e.g., Gemini CLI `settings.json`) to give the AI agent 
   "args": [
     "exec",
     "-i",
+    "-u",
+    "www-data",
     "php-monolith-app",
     "/opt/builder_venv/bin/python",
     "/var/www/html/builder/mcp_server.py"

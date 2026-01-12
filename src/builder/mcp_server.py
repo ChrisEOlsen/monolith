@@ -43,16 +43,8 @@ def parse_fields(fields: List[str]):
             parsed.append({"name": parts[0], "type": "string"})
     return parsed
 
-# --- MCP Tools ---
-
-@mcp.tool()
-def create_model(name: str, fields: List[str]):
-    """
-    Creates a standalone PHP PDO Model Class.
-    Args:
-        name: The singular snake_case name (e.g., 'invoice_item').
-        fields: List of fields (e.g. ['amount:integer', 'description:string']).
-    """
+def _create_model_internal(name: str, fields: List[str]) -> str:
+    """Internal helper to create a model file."""
     pascal_name = to_pascal_case(name)
     plural_name = to_plural(name)
     parsed_fields = parse_fields(fields)
@@ -74,6 +66,18 @@ def create_model(name: str, fields: List[str]):
         f.write(template.render(ctx))
         
     return f"Created Model: src/public/classes/{pascal_name}.php"
+
+# --- MCP Tools ---
+
+@mcp.tool()
+def create_model(name: str, fields: List[str]):
+    """
+    Creates a standalone PHP PDO Model Class.
+    Args:
+        name: The singular snake_case name (e.g., 'invoice_item').
+        fields: List of fields (e.g. ['amount:integer', 'description:string']).
+    """
+    return _create_model_internal(name, fields)
 
 @mcp.tool()
 def create_page(filename: str, title: str, models: List[str] = []):
@@ -111,7 +115,7 @@ def scaffold_crud(name: str, fields: List[str]):
         fields: List of fields (e.g. ['title:string', 'is_done:boolean']).
     """
     # 1. Create Model
-    model_result = create_model(name, fields)
+    model_result = _create_model_internal(name, fields)
     
     # 2. Create CRUD Page
     pascal_name = to_pascal_case(name)

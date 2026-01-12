@@ -110,6 +110,8 @@ Note: We execute the MCP server INSIDE the running container to give the AI dire
   "args": [
     "exec",
     "-i",
+    "-u",
+    "www-data",
     "php-monolith-app",
     "/opt/builder_venv/bin/python",
     "/var/www/html/builder/mcp_server.py"

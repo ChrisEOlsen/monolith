@@ -37,7 +37,15 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 # Enable mod_rewrite for pretty URLs
 RUN a2enmod rewrite
 
-# 6. Python Environment for MCP Builder
+# 6. User Permissions (Match Host User)
+ARG UID=1000
+ARG GID=1000
+
+# Update www-data to match the host user's UID/GID
+# We use usermod/groupmod to change the existing user instead of creating a new one
+RUN usermod -u ${UID} www-data && groupmod -g ${GID} www-data
+
+# 7. Python Environment for MCP Builder
 # Create a virtual environment and install dependencies
 RUN python3 -m venv /opt/builder_venv
 ENV PATH="/opt/builder_venv/bin:$PATH"
