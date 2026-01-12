@@ -36,7 +36,7 @@ function getListProgress($pdo, $list_id) {
 
 // Fetch Data Helper (Used for both Page Load and HTMX Partial)
 function fetchListData($pdo, $list_id) {
-    $stmt = $pdo->prepare("SELECT * FROM todos WHERE list_id = :list_id ORDER BY is_done ASC, created_at DESC");
+    $stmt = $pdo->prepare("SELECT * FROM todos WHERE list_id = :list_id ORDER BY sort_order ASC, is_done ASC, created_at DESC");
     $stmt->execute(['list_id' => $list_id]);
     $current_todos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -71,12 +71,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header("Location: ?"); exit;
         }
         // Actions that affect the List View (HTMX Target)
-        elseif (in_array($action, ['create_task', 'toggle_task', 'delete_task', 'update_task', 'clear_completed', 'create_subtask', 'toggle_subtask', 'delete_subtask', 'update_subtask'])) {
+        elseif (in_array($action, ['create_task', 'toggle_task', 'delete_task', 'update_task', 'clear_completed', 'create_subtask', 'toggle_subtask', 'delete_subtask', 'update_subtask', 'update_order'])) {
             
             // Perform DB Update
             if ($action === 'create_task') {
-                $stmt = $pdo->prepare("INSERT INTO todos (title, list_id, is_done) VALUES (:title, :list_id, 0)");
+                $stmt = $pdo->prepare("INSERT INTO todos (title, list_id, is_done, sort_order) VALUES (:title, :list_id, 0, 0)"); // Default 0 or max
                 $stmt->execute(['title' => $_POST['title'], 'list_id' => $_POST['list_id']]);
+            }
+            elseif ($action === 'update_order') {
+                $ids = $_POST['task_ids'] ?? [];
+                if (is_array($ids)) {
+                    $stmt = $pdo->prepare("UPDATE todos SET sort_order = :order WHERE id = :id");
+                    foreach ($ids as $index => $id) {
+                        $stmt->execute(['order' => $index, 'id' => $id]);
+                    }
+                }
+                // No need to re-render, order is updated on client via drag. 
+                // But re-rendering ensures consistency. Let's exit to avoid flicker if unwanted.
+                if (isset($_SERVER['HTTP_HX_REQUEST'])) exit;
             }
             elseif ($action === 'update_task') {
                 $stmt = $pdo->prepare("UPDATE todos SET title = :title WHERE id = :id");
@@ -137,14 +149,22 @@ function renderTasksContainer($current_todos, $current_list_id) {
     $active_tasks = array_filter($current_todos, fn($t) => !$t['is_done']);
     $completed_tasks = array_filter($current_todos, fn($t) => $t['is_done']);
     ?>
-    <div id="tasks-container" class="flex-1 overflow-y-auto px-4 md:px-8 py-6 space-y-4 pb-24 md:pb-6">
+    <div id="tasks-container" class="flex-1 overflow-y-auto px-2 md:px-8 py-6 space-y-4 pb-24 md:pb-6">
         
         <!-- Active Tasks -->
-        <div class="space-y-3">
+        <div class="space-y-3 sortable-list">
             <?php foreach ($active_tasks as $todo): ?>
                 <?php renderTaskItem($todo, $current_list_id); ?>
             <?php endforeach; ?>
         </div>
+
+        <!-- Sort Order Form (Hidden) -->
+        <form id="sort-form" hx-post="" hx-trigger="submit" hx-swap="none">
+            <input type="hidden" name="action" value="update_order">
+            <input type="hidden" name="list_id" value="<?php echo $current_list_id; ?>">
+            <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
+            <!-- task_ids[] will be appended here by JS -->
+        </form>
 
         <?php if (empty($active_tasks) && empty($completed_tasks)): ?>
             <div class="text-center py-20">
@@ -183,8 +203,15 @@ function renderTasksContainer($current_todos, $current_list_id) {
 
 function renderTaskItem($todo, $current_list_id) {
     ?>
-    <div id="todo-<?php echo $todo['id']; ?>" class="bg-zinc-900 border border-zinc-800 rounded-xl p-4 transition-all hover:border-zinc-700 group">
-        <div class="flex items-start gap-4">
+    <div id="todo-<?php echo $todo['id']; ?>" data-id="<?php echo $todo['id']; ?>" class="bg-zinc-900 border border-zinc-800 rounded-xl p-3 md:p-4 transition-all hover:border-zinc-700 group flex gap-4">
+        <!-- Sort Order Input (Deprecated, handled by JS now) -->
+        
+        <!-- Drag Handle -->
+        <div class="drag-handle cursor-move text-zinc-600 hover:text-zinc-400 pt-1 hidden group-hover:block">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
+        </div>
+
+        <div class="flex items-start gap-4 flex-1">
             <!-- Main Checkbox -->
             <form hx-post="" hx-target="#tasks-container" hx-swap="outerHTML">
                 <input type="hidden" name="action" value="toggle_task">
@@ -200,7 +227,7 @@ function renderTaskItem($todo, $current_list_id) {
 
             <div class="flex-1 min-w-0">
                 <div class="flex justify-between items-start">
-                    <form class="flex-1 mr-2" hx-post="" hx-target="#tasks-container" hx-trigger="change, blur from:find input" hx-swap="outerHTML">
+                    <form class="flex-1 mr-2" hx-post="" hx-target="#tasks-container" hx-trigger="change, submit" hx-swap="outerHTML">
                         <input type="hidden" name="action" value="update_task">
                         <input type="hidden" name="id" value="<?php echo $todo['id']; ?>">
                         <input type="hidden" name="list_id" value="<?php echo $current_list_id; ?>">
@@ -271,7 +298,7 @@ function renderSubtaskItem($sub, $current_list_id) {
             </label>
         </form>
         
-        <form class="flex-1" hx-post="" hx-target="#tasks-container" hx-trigger="change, blur from:find input" hx-swap="outerHTML">
+        <form class="flex-1" hx-post="" hx-target="#tasks-container" hx-trigger="change, submit" hx-swap="outerHTML">
             <input type="hidden" name="action" value="update_subtask">
             <input type="hidden" name="id" value="<?php echo $sub['id']; ?>">
             <input type="hidden" name="list_id" value="<?php echo $current_list_id; ?>">
@@ -406,11 +433,49 @@ function renderSubtaskItem($sub, $current_list_id) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaskMaster</title>
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-zinc-950 text-zinc-100">
-    <?php echo $content; ?>
-</body>
-</html>
+        <title>TaskMaster</title>
+        <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+    </head>
+    <body class="bg-zinc-950 text-zinc-100">
+        <?php echo $content; ?>
+        
+            <script>
+                htmx.onLoad(function(content) {
+                    var sortables = content.querySelectorAll(".sortable-list");
+                    for (var i = 0; i < sortables.length; i++) {
+                        var sortable = sortables[i];
+                        new Sortable(sortable, {
+                            handle: '.drag-handle',
+                            animation: 150,
+                            ghostClass: 'bg-zinc-800',
+                            onEnd: function (evt) {
+                                var itemEl = evt.item;
+                                var container = itemEl.parentElement;
+                                var sortForm = document.getElementById('sort-form');
+                                
+                                // Clear previous IDs
+                                var existingInputs = sortForm.querySelectorAll('input[name="task_ids[]"]');
+                                existingInputs.forEach(input => input.remove());
+        
+                                // Collect new order
+                                var items = container.querySelectorAll('[data-id]');
+                                items.forEach(function(item) {
+                                    var input = document.createElement('input');
+                                    input.type = 'hidden';
+                                    input.name = 'task_ids[]';
+                                    input.value = item.getAttribute('data-id');
+                                    sortForm.appendChild(input);
+                                });
+        
+                                // Trigger HTMX
+                                htmx.trigger(sortForm, 'submit');
+                            }
+                        });
+                    }
+                });
+            </script>
+        </body>
+        </html>
+        
