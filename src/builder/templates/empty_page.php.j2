@@ -1,0 +1,76 @@
+<?php
+/**
+ * PAGE: {{ page_name }}
+ */
+require_once 'db.php';
+require_once 'csrf.php';
+
+// Include requested models
+{% for model in models %}
+require_once 'classes/{{ model }}.php';
+${{ model | lower }}Model = new {{ model }}($pdo);
+{% endfor %}
+
+// Page Logic
+$error = null;
+$message = null;
+
+// Handle Actions (Optional)
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!isset($_POST['csrf_token']) || !verify_csrf_token($_POST['csrf_token'])) {
+        $error = "Security Error: Invalid CSRF token.";
+    } else {
+        // Post logic here
+    }
+}
+?>
+
+{% set content %}
+<div class="container mx-auto py-8">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">{{ page_title }}</h1>
+    
+    <!-- Feedback -->
+    <?php if ($error): ?><div class="bg-red-100 text-red-700 p-4 rounded mb-4"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
+    <?php if ($message): ?><div class="bg-green-100 text-green-700 p-4 rounded mb-4"><?php echo htmlspecialchars($message); ?></div><?php endif; ?>
+
+    <!-- 
+      TODO: Implement UI for {{ page_name }}
+    -->
+    <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+        <p class="text-gray-500">Content for {{ page_name }} goes here.</p>
+    </div>
+</div>
+{% endset %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    
+    <!-- Tailwind CSS -->
+    <?php if (getenv('APP_ENV') === 'prod'): ?>
+        <link rel="stylesheet" href="/style.css">
+    <?php else: ?>
+        <script src="https://cdn.tailwindcss.com"></script>
+    <?php endif; ?>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans">
+    <nav class="bg-white border-b border-gray-200 px-6 py-4 mb-8">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/" class="text-xl font-bold text-indigo-600 hover:text-indigo-800 transition">MyApp</a>
+            <div class="space-x-4 text-sm font-medium text-gray-500">
+                <!-- Nav Links -->
+                <a href="/" class="hover:text-indigo-600">Home</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-6">
+        <?php echo $content; ?>
+    </main>
+</body>
+</html>

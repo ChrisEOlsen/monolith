@@ -1,0 +1,100 @@
+<?php
+/**
+ * FEATURE: {{ pascal_name }}
+ * LOGIC: Standard CRUD Controller
+ */
+require_once 'db.php';
+require_once 'csrf.php';
+require_once 'classes/{{ pascal_name }}.php';
+
+$model = new {{ pascal_name }}($pdo);
+$error = null;
+$message = null;
+
+// --- CONTROLLER LOGIC ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // 1. Security Check
+    if (!isset($_POST['csrf_token']) || !verify_csrf_token($_POST['csrf_token'])) {
+        $error = "Security Error: Invalid CSRF token.";
+        if (isset($_SERVER['HTTP_HX_REQUEST'])) { http_response_code(403); echo $error; exit; }
+    } else {
+        // 2. Action Handling
+        try {
+            if (isset($_POST['action']) && $_POST['action'] === 'create') {
+                $model->create($_POST);
+                $message = "Created successfully.";
+                if (!isset($_SERVER['HTTP_HX_REQUEST'])) { header("Location: " . $_SERVER['PHP_SELF']); exit; }
+            } elseif (isset($_POST['action']) && $_POST['action'] === 'delete') {
+                $model->delete($_POST['id']);
+                if (isset($_SERVER['HTTP_HX_REQUEST'])) { exit; } // HTMX: Stop here to remove element
+                header("Location: " . $_SERVER['PHP_SELF']); exit;
+            }
+        } catch (Exception $e) {
+            $error = $e->getMessage();
+        }
+    }
+}
+
+// 3. Data Fetching
+$items = $model->getAll();
+?>
+
+{% set content %}
+<div id="feature-container">
+    <!-- 
+      TODO: DESIGN THIS UI
+      Available Variables:
+      - $items (Array of objects)
+      - $error (String|null)
+      - $message (String|null)
+    -->
+
+    <h1>{{ plural_name | capitalize }}</h1>
+
+    <!-- Feedback Area -->
+    <?php if ($error): ?><div class="error"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
+    <?php if ($message): ?><div class="success"><?php echo htmlspecialchars($message); ?></div><?php endif; ?>
+
+    <!-- Minimal Form Shell -->
+    <form method="POST">
+        <input type="hidden" name="action" value="create">
+        <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
+        
+        <!-- Generate inputs for: {% for field in fields %}{{ field.name }}, {% endfor %} -->
+        {% for field in fields %}
+        <label>{{ field.name | capitalize }}: <input type="text" name="{{ field.name }}" required></label>
+        {% endfor %}
+        <button type="submit">Create</button>
+    </form>
+
+    <hr>
+
+    <!-- Minimal List Shell -->
+    <ul id="list-container">
+        <?php foreach ($items as $item): ?>
+        <li id="row-<?php echo $item['id']; ?>">
+            <strong>#<?php echo $item['id']; ?></strong>
+            
+            <!-- Display Fields -->
+            {% for field in fields %}
+            <span><?php echo htmlspecialchars($item['{{ field.name }}'] ?? ''); ?></span>
+            {% endfor %}
+
+            <!-- Delete Action -->
+            <form method="POST" style="display:inline;">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="id" value="<?php echo $item['id']; ?>">
+                <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
+                <button type="submit" 
+                    hx-post="" 
+                    hx-confirm="Are you sure?" 
+                    hx-target="#row-<?php echo $item['id']; ?>" 
+                    hx-swap="delete">
+                    Delete
+                </button>
+            </form>
+        </li>
+        <?php endforeach; ?>
+    </ul>
+</div>
+{% endset %}
