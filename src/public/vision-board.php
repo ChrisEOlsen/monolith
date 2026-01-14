@@ -96,7 +96,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute(['id' => $goal_id]);
                 $goal = $stmt->fetch(PDO::FETCH_ASSOC);
                 
-                $stmt = $pdo->prepare("SELECT * FROM vision_milestones WHERE goal_id = :id ORDER BY created_at ASC");
+                // Fetch fresh milestones
+                $stmt = $pdo->prepare("SELECT * FROM vision_milestones WHERE goal_id = :id ORDER BY created_at ASC, id ASC");
                 $stmt->execute(['id' => $goal_id]);
                 $all_milestones = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 
