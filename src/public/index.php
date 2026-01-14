@@ -114,6 +114,26 @@
                     </div>
                 </div>
             </a>
+
+            <!-- Questions Card -->
+            <a href="/questions.php" class="group relative bg-zinc-900 border border-zinc-800 rounded-2xl p-8 transition-all duration-300 hover:border-zinc-700 hover:-translate-y-1 overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div class="relative z-10 flex flex-col items-start text-left h-full">
+                    <div class="w-12 h-12 bg-zinc-800 rounded-xl flex items-center justify-center mb-6 group-hover:bg-zinc-700 transition-colors border border-zinc-700/50">
+                        <svg class="w-6 h-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    
+                    <h2 class="text-2xl font-bold text-white mb-2 group-hover:text-amber-300 transition-colors">Questions</h2>
+                    <p class="text-zinc-400 text-sm leading-relaxed mb-6">
+                        A curiosity journal. Capture fleeting questions, research them later, and build your own personal knowledge base.
+                    </p>
+                    
+                    <div class="mt-auto flex items-center text-sm font-medium text-zinc-500 group-hover:text-white transition-colors">
+                        Launch App <span class="ml-2 transition-transform group-hover:translate-x-1">→</span>
+                    </div>
+                </div>
+            </a>
         </div>
     </main>
 
