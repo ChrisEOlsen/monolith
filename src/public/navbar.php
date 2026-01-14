@@ -32,6 +32,9 @@
                 <a href="/vision-board.php" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-rose-500"></span> Vision Board
                 </a>
+                <a href="/bookmarks.php" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-blue-500"></span> Bookmarks
+                </a>
             </div>
         </div>
     </div>

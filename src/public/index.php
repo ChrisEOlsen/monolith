@@ -94,6 +94,26 @@
                     </div>
                 </div>
             </a>
+
+            <!-- Bookmarks Card -->
+            <a href="/bookmarks.php" class="group relative bg-zinc-900 border border-zinc-800 rounded-2xl p-8 transition-all duration-300 hover:border-zinc-700 hover:-translate-y-1 overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div class="relative z-10 flex flex-col items-start text-left h-full">
+                    <div class="w-12 h-12 bg-zinc-800 rounded-xl flex items-center justify-center mb-6 group-hover:bg-zinc-700 transition-colors border border-zinc-700/50">
+                        <svg class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
+                    </div>
+                    
+                    <h2 class="text-2xl font-bold text-white mb-2 group-hover:text-blue-300 transition-colors">Bookmarks</h2>
+                    <p class="text-zinc-400 text-sm leading-relaxed mb-6">
+                        A utility-focused link manager. Organize your reading lists and dev tools in a compact, distraction-free interface.
+                    </p>
+                    
+                    <div class="mt-auto flex items-center text-sm font-medium text-zinc-500 group-hover:text-white transition-colors">
+                        Launch App <span class="ml-2 transition-transform group-hover:translate-x-1">→</span>
+                    </div>
+                </div>
+            </a>
         </div>
     </main>
 
