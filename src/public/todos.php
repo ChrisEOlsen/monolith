@@ -349,15 +349,14 @@ function renderSubtaskItem($sub, $current_list_id) {
                 
                 <div class="relative z-10">
                     <div class="flex justify-between items-start mb-4">
-                        <div class="w-12 h-12 bg-zinc-800 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-                            📁
+                        <div class="opacity-0 group-hover:opacity-100 transition-opacity ml-auto">
+                            <form method="POST" onsubmit="return confirm('Delete list?');">
+                                <input type="hidden" name="action" value="delete_list">
+                                <input type="hidden" name="id" value="<?php echo $list['id']; ?>">
+                                <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
+                                <button class="text-zinc-500 hover:text-red-500 p-1"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                            </form>
                         </div>
-                        <form method="POST" onsubmit="return confirm('Delete list?');" class="opacity-0 group-hover:opacity-100 transition-opacity">
-                            <input type="hidden" name="action" value="delete_list">
-                            <input type="hidden" name="id" value="<?php echo $list['id']; ?>">
-                            <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
-                            <button class="text-zinc-500 hover:text-red-500 p-1"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
-                        </form>
                     </div>
                     
                     <h2 class="text-xl font-bold text-zinc-100 mb-1"><?php echo htmlspecialchars($list['title']); ?></h2>
