@@ -134,6 +134,26 @@
                     </div>
                 </div>
             </a>
+
+            <!-- Journal Card -->
+            <a href="/journal.php" class="group relative bg-zinc-900 border border-zinc-800 rounded-2xl p-8 transition-all duration-300 hover:border-zinc-700 hover:-translate-y-1 overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div class="relative z-10 flex flex-col items-start text-left h-full">
+                    <div class="w-12 h-12 bg-zinc-800 rounded-xl flex items-center justify-center mb-6 group-hover:bg-zinc-700 transition-colors border border-zinc-700/50">
+                        <svg class="w-6 h-6 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                    </div>
+                    
+                    <h2 class="text-2xl font-bold text-white mb-2 group-hover:text-violet-300 transition-colors">Journal</h2>
+                    <p class="text-zinc-400 text-sm leading-relaxed mb-6">
+                        A distraction-free writing space. Capture your daily thoughts, track your mood, and build a habit of reflection.
+                    </p>
+                    
+                    <div class="mt-auto flex items-center text-sm font-medium text-zinc-500 group-hover:text-white transition-colors">
+                        Launch App <span class="ml-2 transition-transform group-hover:translate-x-1">→</span>
+                    </div>
+                </div>
+            </a>
         </div>
     </main>
 

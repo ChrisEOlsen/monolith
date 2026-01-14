@@ -38,6 +38,9 @@
                 <a href="/questions.php" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-amber-500"></span> Questions
                 </a>
+                <a href="/journal.php" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-violet-500"></span> Journal
+                </a>
             </div>
         </div>
     </div>
