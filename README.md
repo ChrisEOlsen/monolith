@@ -98,6 +98,11 @@ Unlike distributed microservices, this stack runs as a **Unified Monolith**.
     
     - **App:** `http://localhost`
     - **Database Admin:** `http://localhost:8080` (phpMyAdmin)
+
+4. **Verify MCP Tools:**
+    Open the `gemini` CLI and run the `/mcp` command to ensure the tools are detected.
+    
+    > **Note:** Ensure the Docker container is running **before** you open the `gemini` CLI so that it can successfully connect to the MCP server.
         
 
 ## 🤖 MCP Integration
