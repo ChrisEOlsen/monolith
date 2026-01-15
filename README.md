@@ -71,6 +71,7 @@ Unlike distributed microservices, this stack runs as a **Unified Monolith**.
 
 ### Prerequisites
 
+- [gemini-cli](https://github.com/google/gemini-cli)
 - Docker & Docker Compose
 - A Cloudflare Tunnel Token (optional, for public access)
     
@@ -80,8 +81,8 @@ Unlike distributed microservices, this stack runs as a **Unified Monolith**.
 1. **Clone the repository:**
     
     ```bash
-    git clone https://github.com/your-username/mcp-php-monolith.git
-    cd mcp-php-monolith
+    git clone https://github.com/ChrisEOlsen/ai-first-php-monolith.git
+    cd ai-first-php-monolith
     ```
     
 2. **Start the Monolith:**
@@ -129,3 +130,9 @@ Note: We execute the MCP server INSIDE the running container to give the AI dire
 ## 📜 License
 
 MIT
+
+---
+
+**Deployment Note:**
+- **Public Domain:** For launching on a public domain, the recommended approach is to use a server with a working **Traefik** instance and a **Cloudflare Tunnel**.
+- **Personal Use:** For personal use only, launch it on a server and connect your devices via **Tailscale**.
