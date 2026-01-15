@@ -71,9 +71,12 @@ Unlike distributed microservices, this stack runs as a **Unified Monolith**.
 
 ### Prerequisites
 
-- [gemini-cli](https://github.com/google/gemini-cli)
-- Docker & Docker Compose
-- A Cloudflare Tunnel Token (optional, for public access)
+- **gemini-cli:** Install via npm:
+  ```bash
+  npm install -g @google/gemini-cli
+  ```
+- **Docker & Docker Compose:** Ensure Docker Engine is installed and running.
+- **A Cloudflare Tunnel Token** (optional, for public access)
     
 
 ### Installation
