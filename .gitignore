@@ -1,25 +1,21 @@
-# CakePHP 3
+# Environment variables
+.env
 
-/vendor/*
-/config/app.php
+# Docker
+.docker/
 
-/tmp/cache/models/*
-!/tmp/cache/models/empty
-/tmp/cache/persistent/*
-!/tmp/cache/persistent/empty
-/tmp/cache/views/*
-!/tmp/cache/views/empty
-/tmp/sessions/*
-!/tmp/sessions/empty
-/tmp/tests/*
-!/tmp/tests/empty
+# OS files
+.DS_Store
+Thumbs.db
 
-/logs/*
-!/logs/empty
+# Python (Builder)
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+/opt/builder_venv/
 
-# CakePHP 2
-
-/app/tmp/*
-/app/Config/core.php
-/app/Config/database.php
-/vendors/*
+# PHP
+/vendor/
+composer.lock
