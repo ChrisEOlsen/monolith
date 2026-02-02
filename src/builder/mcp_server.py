@@ -138,6 +138,127 @@ def scaffold_crud(name: str, fields: List[str]):
     return f"Scaffold Complete.\n1. {model_result}\n2. Created CRUD Page: src/public/{plural_name}.php"
 
 @mcp.tool()
+def scaffold_auth():
+    """
+    Scaffolds a complete authentication system:
+    1. Creates 'users' table in MySQL.
+    2. Generates User model (src/public/classes/User.php).
+    3. Generates Login, Register, and Logout pages.
+    """
+    # 1. Create Users Table
+    create_table_sql = """
+    CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS login_attempts (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        ip_address VARCHAR(45) NOT NULL,
+        attempts INT DEFAULT 1,
+        last_attempt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        locked_until TIMESTAMP NULL DEFAULT NULL,
+        UNIQUE KEY unique_ip (ip_address)
+    );
+    """
+    
+    try:
+        conn = mysql.connector.connect(
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASS,
+            database=DB_NAME
+        )
+        cursor = conn.cursor()
+        # Split and execute statements individually
+        statements = create_table_sql.split(';')
+        for stmt in statements:
+            if stmt.strip():
+                cursor.execute(stmt)
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        return f"Error creating 'users' table: {str(e)}"
+
+    # 2. Generate User Model
+    classes_dir = os.path.join(PUBLIC_DIR, "classes")
+    os.makedirs(classes_dir, exist_ok=True)
+    
+    # We use the specialized user_model template
+    try:
+        model_template = templates_env.get_template("user_model.php.j2")
+        with open(os.path.join(classes_dir, "User.php"), "w") as f:
+            f.write(model_template.render())
+    except Exception as e:
+        return f"Error creating User model: {str(e)}"
+
+    # 3. Generate Auth Pages (Login & Logout only)
+    pages = {
+        "login.php": "login_page.php.j2",
+        "logout.php": "logout.php.j2"
+    }
+
+    created_files = ["src/public/classes/User.php"]
+
+    try:
+        for filename, template_name in pages.items():
+            template = templates_env.get_template(template_name)
+            with open(os.path.join(PUBLIC_DIR, filename), "w") as f:
+                f.write(template.render())
+            created_files.append(f"src/public/{filename}")
+    except Exception as e:
+        return f"Error generating auth pages: {str(e)}"
+        
+    return f"Auth Scaffold Complete.\nFiles Created:\n" + "\n".join(created_files)
+
+@mcp.tool()
+def scaffold_registration():
+    """
+    Adds user registration capability to the authentication system.
+    1. Generates register.php.
+    2. Adds a 'Register' link to login.php.
+    """
+    # 1. Generate Register Page
+    try:
+        template = templates_env.get_template("register_page.php.j2")
+        with open(os.path.join(PUBLIC_DIR, "register.php"), "w") as f:
+            f.write(template.render())
+    except Exception as e:
+        return f"Error generating register.php: {str(e)}"
+
+    # 2. Update login.php with link
+    login_path = os.path.join(PUBLIC_DIR, "login.php")
+    if os.path.exists(login_path):
+        try:
+            with open(login_path, "r") as f:
+                content = f.read()
+            
+            # Simple check to avoid duplicates
+            if "register.php" not in content:
+                # Look for the Sign In button closing tag and append the link
+                insertion_point = "</button>"
+                link_html = """
+                <a class="inline-block align-baseline font-bold text-sm text-blue-600 hover:text-blue-800" href="/register.php">
+                    Register
+                </a>"""
+                
+                if insertion_point in content:
+                    # We look for the last occurrence in the form
+                    parts = content.rsplit(insertion_point, 1)
+                    if len(parts) == 2:
+                        new_content = parts[0] + insertion_point + link_html + parts[1]
+                        with open(login_path, "w") as f:
+                            f.write(new_content)
+        except Exception as e:
+             return f"Created register.php but failed to update login.php: {str(e)}"
+
+    return "Registration Scaffold Complete.\n1. Created src/public/register.php\n2. Updated src/public/login.php with link."
+
+@mcp.tool()
 def execute_sql(query: str):
     """
     Executes a raw SQL query against the MySQL database.

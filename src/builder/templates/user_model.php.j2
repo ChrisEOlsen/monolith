@@ -1,0 +1,58 @@
+<?php
+
+class User {
+    private $pdo;
+
+    public function __construct($pdo) {
+        $this->pdo = $pdo;
+    }
+
+    /**
+     * Create a new user.
+     *
+     * @param array $data ['name', 'email', 'password']
+     * @return bool
+     */
+    public function create(array $data) {
+        $sql = "INSERT INTO users (name, email, password) VALUES (:name, :email, :password)";
+        $stmt = $this->pdo->prepare($sql);
+        
+        $stmt->bindValue(':name', $data['name']);
+        $stmt->bindValue(':email', $data['email']);
+        $stmt->bindValue(':password', password_hash($data['password'], PASSWORD_DEFAULT));
+        
+        try {
+            return $stmt->execute();
+        } catch (\PDOException $e) {
+            // Check for duplicate entry on email (SQL State 23000)
+            if ($e->getCode() == 23000) { 
+                return false;
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * Find a user by email.
+     *
+     * @param string $email
+     * @return array|false
+     */
+    public function findByEmail($email) {
+        $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = :email");
+        $stmt->execute(['email' => $email]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Find a user by ID.
+     *
+     * @param int $id
+     * @return array|false
+     */
+    public function find($id) {
+        $stmt = $this->pdo->prepare("SELECT * FROM users WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+}
