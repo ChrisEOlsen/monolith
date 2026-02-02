@@ -80,13 +80,14 @@ def create_model(name: str, fields: List[str]):
     return _create_model_internal(name, fields)
 
 @mcp.tool()
-def create_page(filename: str, title: str, models: List[str] = []):
+def create_page(filename: str, title: str, models: List[str] = [], auth_required: bool = False):
     """
     Creates a blank PHP page wired with DB, CSRF, and requested Models.
     Args:
         filename: The output filename (e.g., 'dashboard.php').
         title: The page <title>.
         models: List of PascalCase model names to include and instantiate (e.g. ['User', 'Invoice']).
+        auth_required: If True, adds a secure session check at the top of the file.
     """
     # Ensure filename ends in .php
     if not filename.endswith('.php'):
@@ -95,7 +96,8 @@ def create_page(filename: str, title: str, models: List[str] = []):
     ctx = {
         "page_name": filename,
         "page_title": title,
-        "models": models
+        "models": models,
+        "auth_required": auth_required
     }
 
     page_path = os.path.join(PUBLIC_DIR, filename)
@@ -104,7 +106,7 @@ def create_page(filename: str, title: str, models: List[str] = []):
     with open(page_path, "w") as f:
         f.write(template.render(ctx))
         
-    return f"Created Page: src/public/{filename} (Includes: {', '.join(models) if models else 'None'})"
+    return f"Created Page: src/public/{filename} (Includes: {', '.join(models) if models else 'None'}, Auth: {auth_required})"
 
 @mcp.tool()
 def scaffold_crud(name: str, fields: List[str]):
