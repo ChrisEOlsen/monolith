@@ -109,6 +109,126 @@ def create_page(filename: str, title: str, models: List[str] = [], auth_required
     return f"Created Page: src/public/{filename} (Includes: {', '.join(models) if models else 'None'}, Auth: {auth_required})"
 
 @mcp.tool()
+def create_internal_api(name: str, method: str = "GET", models: List[str] = [], auth_required: bool = False):
+    """
+    Creates an internal API endpoint in src/public/api/ for HTMX/JSON.
+    Args:
+        name: The endpoint name (e.g. 'project_stats' -> src/public/api/project_stats.php).
+        method: HTTP method (GET, POST, etc.).
+        models: List of PascalCase models to include.
+        auth_required: If True, adds session/auth check.
+    """
+    # Ensure filename ends in .php
+    if not name.endswith('.php'):
+        filename = name + '.php'
+    else:
+        filename = name
+        name = name[:-4]
+
+    ctx = {
+        "name": name,
+        "method": method.upper(),
+        "models": models,
+        "auth_required": auth_required
+    }
+
+    api_dir = os.path.join(PUBLIC_DIR, "api")
+    os.makedirs(api_dir, exist_ok=True)
+    
+    file_path = os.path.join(api_dir, filename)
+    template = templates_env.get_template("api_endpoint.php.j2")
+    
+    with open(file_path, "w") as f:
+        f.write(template.render(ctx))
+        
+    return f"Created Internal API: src/public/api/{filename} (Method: {method}, Auth: {auth_required})"
+
+@mcp.tool()
+def scaffold_feature(name: str, fields: List[str]):
+    """
+    Generates a full 'Gap Stack' feature: Model + HTMX API + UI Page.
+    Args:
+        name: Singular feature name (e.g. 'task').
+        fields: List of fields (e.g. ['title:string', 'is_done:boolean']).
+    """
+    # 1. Create Model
+    model_res = _create_model_internal(name, fields)
+    
+    # 2. Create Internal API (HTMX List)
+    pascal_name = to_pascal_case(name)
+    plural_name = to_plural(name)
+    
+    # We manually use the internal logic or calling the function if possible, 
+    # but since they are decorated, we replicate the logic or call the underlying function if we separated them.
+    # For simplicity, we'll generate the API file directly here to ensure it's wired for THIS feature specifically.
+    
+    api_filename = f"{plural_name}_list.php"
+    api_ctx = {
+        "name": f"{plural_name}_list",
+        "method": "GET",
+        "models": [pascal_name],
+        "auth_required": True
+    }
+    # We need a specialized template for a "List API" ideally, but we can use the generic one 
+    # and maybe inject a TODO comment about fetching the specific model data.
+    # Actually, let's create a specialized content for the API to make it useful immediately.
+    
+    api_content = f"""<?php
+require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../csrf.php';
+
+// Auth Check
+if (session_status() === PHP_SESSION_NONE) session_start();
+if (!isset($_SESSION['user_id'])) {{ http_response_code(401); exit; }}
+
+require_once __DIR__ . '/../classes/{pascal_name}.php';
+${name}Model = new {pascal_name}($pdo);
+
+try {{
+    // Fetch Data
+    // Note: You might want to filter by user_id if the model supports it
+    $items = ${name}Model->getAll(); 
+    
+    if (empty($items)) {{
+        echo '<p class="text-gray-500 italic">No {plural_name} found.</p>';
+    }} else {{
+        echo '<ul class="space-y-2">';
+        foreach ($items as $item) {{
+            echo '<li class="p-3 bg-white shadow rounded flex justify-between">';
+            // Display the first non-id field
+            echo '<span class="font-medium">' . htmlspecialchars(array_values($item)[1] ?? 'Item') . '</span>';
+            echo '</li>';
+        }}
+        echo '</ul>';
+    }}
+}} catch (Exception $e) {{
+    http_response_code(500);
+    echo 'Error loading data.';
+}}
+"""
+    os.makedirs(os.path.join(PUBLIC_DIR, "api"), exist_ok=True)
+    with open(os.path.join(PUBLIC_DIR, "api", api_filename), "w") as f:
+        f.write(api_content)
+
+    # 3. Create UI Page
+    page_filename = f"{plural_name}.php"
+    
+    # Use template instead of hardcoded string
+    parsed_fields = parse_fields(fields)
+    ctx = {
+        "name": name,
+        "pascal_name": pascal_name,
+        "plural_name": plural_name,
+        "fields": parsed_fields
+    }
+    
+    template = templates_env.get_template("feature_page.php.j2")
+    with open(os.path.join(PUBLIC_DIR, page_filename), "w") as f:
+        f.write(template.render(ctx))
+
+    return f"Feature Scaffold Complete for '{name}'.\n1. Model: User.php\n2. API: src/public/api/{api_filename}\n3. UI: src/public/{page_filename}"
+
+@mcp.tool()
 def scaffold_crud(name: str, fields: List[str]):
     """
     High-Level Macro: Generates BOTH a Model and a CRUD Page.
@@ -309,6 +429,26 @@ def build_css(minify: bool = False):
         return f"CSS built successfully to {output_path}."
     except Exception as e:
         return f"Build Error: {str(e)}"
+
+@mcp.tool()
+def run_linter():
+    """
+    Runs the static analysis linter (Syntax check + Pattern Guardrails).
+    Returns a report of any issues found.
+    """
+    script_path = "/var/www/html/scripts/lint_codebase.py"
+    try:
+        # We run it using the venv python
+        cmd = ["/opt/builder_venv/bin/python", script_path]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        
+        output = result.stdout
+        if result.stderr:
+            output += "\nErrors:\n" + result.stderr
+            
+        return output
+    except Exception as e:
+        return f"Linter Execution Failed: {str(e)}"
 
 @mcp.tool()
 def run_perl_script(script_name: str, args: List[str] = []):

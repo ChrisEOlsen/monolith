@@ -1,0 +1,54 @@
+<?php
+require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../csrf.php';
+
+// 1. Authentication Check
+{% if auth_required %}
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+if (!isset($_SESSION['user_id'])) {
+    http_response_code(401);
+    echo "Unauthorized";
+    exit;
+}
+{% endif %}
+
+// 2. Method Check
+if ($_SERVER['REQUEST_METHOD'] !== '{{ method }}') {
+    http_response_code(405);
+    echo "Method Not Allowed";
+    exit;
+}
+
+// 3. CSRF Check (For state-changing requests)
+{% if method in ['POST', 'PUT', 'DELETE'] %}
+// Note: API clients might need to send the token in a header 'X-CSRF-Token'
+$token = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+if (!verify_csrf_token($token)) {
+    http_response_code(403);
+    echo "Invalid CSRF Token";
+    exit;
+}
+{% endif %}
+
+// 4. Model Logic
+{% for model in models %}
+require_once __DIR__ . '/../classes/{{ model }}.php';
+${{ model | lower }}Model = new {{ model }}($pdo);
+{% endfor %}
+
+try {
+    // TODO: Implement your HTMX logic here.
+    // Return an HTML Fragment (e.g., <div>...</div>)
+    ?>
+    <div class="p-4 bg-white shadow rounded">
+        <h3 class="font-bold text-gray-800">Endpoint: {{ name }}</h3>
+        <p class="text-sm text-gray-600">Timestamp: <?= date('H:i:s') ?></p>
+    </div>
+    <?php
+
+} catch (Exception $e) {
+    http_response_code(500);
+    echo '<div class="text-red-500">Error: ' . htmlspecialchars($e->getMessage()) . '</div>';
+}

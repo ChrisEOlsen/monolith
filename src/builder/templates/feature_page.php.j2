@@ -1,100 +1,98 @@
 <?php
-/**
- * FEATURE: {{ pascal_name }}
- * LOGIC: Standard CRUD Controller
- */
 require_once 'db.php';
 require_once 'csrf.php';
-require_once 'classes/{{ pascal_name }}.php';
 
-$model = new {{ pascal_name }}($pdo);
-$error = null;
-$message = null;
-
-// --- CONTROLLER LOGIC ---
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // 1. Security Check
-    if (!isset($_POST['csrf_token']) || !verify_csrf_token($_POST['csrf_token'])) {
-        $error = "Security Error: Invalid CSRF token.";
-        if (isset($_SERVER['HTTP_HX_REQUEST'])) { http_response_code(403); echo $error; exit; }
-    } else {
-        // 2. Action Handling
-        try {
-            if (isset($_POST['action']) && $_POST['action'] === 'create') {
-                $model->create($_POST);
-                $message = "Created successfully.";
-                if (!isset($_SERVER['HTTP_HX_REQUEST'])) { header("Location: " . $_SERVER['PHP_SELF']); exit; }
-            } elseif (isset($_POST['action']) && $_POST['action'] === 'delete') {
-                $model->delete($_POST['id']);
-                if (isset($_SERVER['HTTP_HX_REQUEST'])) { exit; } // HTMX: Stop here to remove element
-                header("Location: " . $_SERVER['PHP_SELF']); exit;
-            }
-        } catch (Exception $e) {
-            $error = $e->getMessage();
-        }
-    }
+if (session_status() === PHP_SESSION_NONE) session_start();
+if (!isset($_SESSION['user_id'])) {
+    $_SESSION['auth_redirect_to'] = $_SERVER['REQUEST_URI'];
+    header("Location: /login.php");
+    exit;
 }
-
-// 3. Data Fetching
-$items = $model->getAll();
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ pascal_name }} Manager</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <?php if (getenv('APP_ENV') === 'prod'): ?>
+        <link rel="stylesheet" href="/style.css">
+    <?php else: ?>
+        <script src="https://cdn.tailwindcss.com"></script>
+    <?php endif; ?>
+</head>
+<body class="bg-white font-sans text-gray-900">
+    <!-- Neutral Nav -->
+    <nav class="border-b border-gray-200 px-6 py-4 mb-8">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/" class="text-xl font-bold">MyApp</a>
+            <div class="flex items-center space-x-4">
+                <a href="/" class="hover:underline">Home</a>
+                <a href="/logout.php" class="text-sm hover:underline">Logout</a>
+            </div>
+        </div>
+    </nav>
 
-{% set content %}
-<div id="feature-container">
-    <!-- 
-      TODO: DESIGN THIS UI
-      Available Variables:
-      - $items (Array of objects)
-      - $error (String|null)
-      - $message (String|null)
-    -->
+    <main class="container mx-auto px-6 py-8" x-data="{ open: false }">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold">{{ plural_name | capitalize }}</h1>
+            <button @click="open = true" class="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition">
+                + New {{ pascal_name }}
+            </button>
+        </div>
 
-    <h1>{{ plural_name | capitalize }}</h1>
+        <div class="border border-gray-200 rounded p-4">
+            <!-- HTMX List Container -->
+            <div id="{{ name }}-list" 
+                 hx-get="/api/{{ plural_name }}_list.php" 
+                 hx-trigger="load"
+                 class="min-h-[100px]">
+                <span class="text-gray-400 italic">Loading...</span>
+            </div>
+        </div>
 
-    <!-- Feedback Area -->
-    <?php if ($error): ?><div class="error"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
-    <?php if ($message): ?><div class="success"><?php echo htmlspecialchars($message); ?></div><?php endif; ?>
-
-    <!-- Minimal Form Shell -->
-    <form method="POST">
-        <input type="hidden" name="action" value="create">
-        <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
-        
-        <!-- Generate inputs for: {% for field in fields %}{{ field.name }}, {% endfor %} -->
-        {% for field in fields %}
-        <label>{{ field.name | capitalize }}: <input type="text" name="{{ field.name }}" required></label>
-        {% endfor %}
-        <button type="submit">Create</button>
-    </form>
-
-    <hr>
-
-    <!-- Minimal List Shell -->
-    <ul id="list-container">
-        <?php foreach ($items as $item): ?>
-        <li id="row-<?php echo $item['id']; ?>">
-            <strong>#<?php echo $item['id']; ?></strong>
+        <!-- Create Modal (Wireframe) -->
+        <div x-show="open" 
+             style="display: none;"
+             class="fixed inset-0 bg-gray-900 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center"
+             x-transition.opacity>
             
-            <!-- Display Fields -->
-            {% for field in fields %}
-            <span><?php echo htmlspecialchars($item['{{ field.name }}'] ?? ''); ?></span>
-            {% endfor %}
-
-            <!-- Delete Action -->
-            <form method="POST" style="display:inline;">
-                <input type="hidden" name="action" value="delete">
-                <input type="hidden" name="id" value="<?php echo $item['id']; ?>">
-                <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
-                <button type="submit" 
-                    hx-post="" 
-                    hx-confirm="Are you sure?" 
-                    hx-target="#row-<?php echo $item['id']; ?>" 
-                    hx-swap="delete">
-                    Delete
-                </button>
-            </form>
-        </li>
-        <?php endforeach; ?>
-    </ul>
-</div>
-{% endset %}
+            <div class="relative p-6 border w-96 shadow-xl rounded bg-white" @click.away="open = false">
+                <h3 class="text-lg font-bold mb-4">Create {{ pascal_name }}</h3>
+                
+                <form hx-post="/api/{{ plural_name }}_create.php" 
+                      hx-target="#{{ name }}-list ul" 
+                      hx-swap="beforeend"
+                      @htmx:after-request="if(event.detail.successful) { open = false; $el.reset(); }"
+                      id="{{ name }}-form">
+                    
+                    <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
+                    
+                    {% for field in fields %}
+                    <div class="mb-4">
+                        <label class="block text-sm font-bold mb-1" for="{{ field.name }}">{{ field.name | capitalize }}</label>
+                        {% if field.type == 'boolean' %}
+                        <input type="checkbox" name="{{ field.name }}" id="{{ field.name }}" value="1">
+                        {% else %}
+                        <input type="text" name="{{ field.name }}" id="{{ field.name }}" required
+                               class="border border-gray-300 rounded w-full py-2 px-3 focus:outline-none focus:border-black">
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="flex justify-end gap-2 mt-6">
+                        <button type="button" @click="open = false" class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-black text-white rounded hover:bg-gray-800">
+                            Create
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

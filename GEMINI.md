@@ -26,7 +26,10 @@ When the user asks for a feature (e.g., "Create a Project Manager"), you MUST fo
     *   *Why?* It generates the Model AND the UI shell in one go.
 *   **Option B (Custom):** 
     1.  Use `create_model(name='project', ...)` to get the secure PDO class.
-    2.  Use `create_page(filename='dashboard.php', models=['Project'])` to get the empty Controller/View shell.
+    2.  Use `create_page(filename='dashboard.php', models=['Project'], auth_required=True)` to get the secure, empty Controller/View shell.
+*   **Option C (Authentication):**
+    *   Use `scaffold_auth()` to generate the `User` model, Login, and Logout pages. It automatically creates `users` and `login_attempts` tables.
+    *   (Optional) Use `scaffold_registration()` to allow public sign-ups with email validation.
 
 ### 3. 🎨 Paint the Interface
 *   **Think:** Now that the logic works, how should it look?
@@ -55,8 +58,22 @@ When the user asks for a feature (e.g., "Create a Project Manager"), you MUST fo
     *   Top of file: `require` statements, Model instantiation, Form handling (`if POST`), Data fetching.
     *   Bottom of file: `?> <!DOCTYPE html>...`
 
-4.  **Security:**
-    *   Always rely on the `csrf_token` verification that comes pre-installed in the templates.
+4.  **Security Built-in:**
+    *   **CSRF:** Always rely on the `csrf_token` verification that comes pre-installed.
+    *   **Sessions:** Cookies are configured with `HttpOnly`, `Secure`, and `SameSite=Lax` by default.
+    *   **Rate Limiting:** Login is protected against brute-force (5 attempts/15 mins).
+    *   **Redirection:** Auth checks should store and redirect to `$_SESSION['auth_redirect_to']`.
+
+## 🏗️ Frontend Architecture: The Gap Stack
+
+We follow a strict **HTMX-First** approach.
+
+1.  **Server-Side Logic:** PHP handles all business logic and data retrieval.
+2.  **Network Transport:** **HTMX** handles fetching data and swapping HTML.
+    *   *Rule:* Do not write custom `fetch()` or `axios` calls.
+    *   *Rule:* APIs should return **HTML Fragments** (e.g. `<li>...</li>`), not JSON, unless building for a mobile app.
+3.  **Client-Side Interactivity:** **Alpine.js** handles UI state (modals, dropdowns, transitions).
+    *   *Rule:* Use Alpine for anything that does *not* require a server round-trip.
 
 ## 🛠️ Tool Cheat Sheet
 
@@ -65,7 +82,12 @@ When the user asks for a feature (e.g., "Create a Project Manager"), you MUST fo
 | `execute_sql` | Creating tables or modifying schema. |
 | `scaffold_crud` | 80% of use cases. Creates Model + CRUD UI. |
 | `create_model` | When you need data access but a custom UI. |
-| `create_page` | When you need a blank page (Landing, Dashboard). |
+| `create_page` | When you need a blank page. Use `auth_required=True` for protected pages. |
+| `create_internal_api` | Creates an endpoint for HTMX (HTML fragments) or JSON. |
+| `scaffold_auth` | Generates User model, Login, and Logout pages (No Registration). |
+| `scaffold_feature` | Generates Model + API + UI Page (Gap Stack compliant). |
+| `run_linter` | Runs PHP syntax check and security pattern matching. |
+| `scaffold_registration` | Adds `register.php` and links it to the login page. |
 | `build_css` | After editing HTML to apply Tailwind styles. |
 
 ---

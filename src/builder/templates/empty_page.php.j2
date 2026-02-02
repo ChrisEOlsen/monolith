@@ -41,22 +41,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 {% set content %}
 <div class="container mx-auto py-8">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">{{ page_title }}</h1>
+        <h1 class="text-3xl font-bold">{{ page_title }}</h1>
         {% if auth_required %}
         <div class="flex items-center space-x-4">
-            <span class="text-sm text-gray-600">Welcome, <?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User'); ?></span>
+            <span class="text-sm text-gray-600">User: <?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Guest'); ?></span>
         </div>
         {% endif %}
     </div>
     
     <!-- Feedback -->
-    <?php if ($error): ?><div class="bg-red-100 text-red-700 p-4 rounded mb-4"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
-    <?php if ($message): ?><div class="bg-green-100 text-green-700 p-4 rounded mb-4"><?php echo htmlspecialchars($message); ?></div><?php endif; ?>
+    <?php if ($error): ?><div class="bg-gray-100 border border-gray-400 text-red-700 p-4 rounded mb-4"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
+    <?php if ($message): ?><div class="bg-gray-100 border border-gray-400 text-green-700 p-4 rounded mb-4"><?php echo htmlspecialchars($message); ?></div><?php endif; ?>
 
     <!-- 
       TODO: Implement UI for {{ page_name }}
     -->
-    <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+    <div class="border border-gray-200 rounded p-8">
         <p class="text-gray-500">Content for {{ page_name }} goes here.</p>
     </div>
 </div>
@@ -70,6 +70,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>{{ page_title }}</title>
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
     <!-- Tailwind CSS -->
     <?php if (getenv('APP_ENV') === 'prod'): ?>
@@ -78,15 +80,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <script src="https://cdn.tailwindcss.com"></script>
     <?php endif; ?>
 </head>
-<body class="bg-gray-50 text-gray-900 font-sans">
-    <nav class="bg-white border-b border-gray-200 px-6 py-4 mb-8">
+<body class="bg-white font-sans text-gray-900">
+    <nav class="border-b border-gray-200 px-6 py-4 mb-8">
         <div class="container mx-auto flex justify-between items-center">
-            <a href="/" class="text-xl font-bold text-indigo-600 hover:text-indigo-800 transition">MyApp</a>
-            <div class="space-x-4 text-sm font-medium text-gray-500 flex items-center">
-                <!-- Nav Links -->
-                <a href="/" class="hover:text-indigo-600">Home</a>
+            <a href="/" class="text-xl font-bold">MyApp</a>
+            <div class="flex items-center space-x-4">
+                <a href="/" class="hover:underline">Home</a>
                 {% if auth_required %}
-                <a href="/logout.php" class="text-red-600 hover:text-red-800 ml-4">Logout</a>
+                <a href="/logout.php" class="text-sm hover:underline">Logout</a>
                 {% endif %}
             </div>
         </div>
