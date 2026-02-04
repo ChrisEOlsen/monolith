@@ -143,10 +143,15 @@ def create_internal_api(name: str, method: str = "GET", models: List[str] = [], 
         
     return f"Created Internal API: src/public/api/{filename} (Method: {method}, Auth: {auth_required})"
 
+    with open(os.path.join(PUBLIC_DIR, page_filename), "w") as f:
+        f.write(template.render(ctx))
+
+    return f"List Scaffold Complete for '{name}'.\n1. Model: src/public/classes/{pascal_name}.php\n2. API: src/public/api/{api_filename}\n3. UI: src/public/{page_filename}"
+
 @mcp.tool()
-def scaffold_feature(name: str, fields: List[str]):
+def scaffold_list(name: str, fields: List[str]):
     """
-    Generates a full 'Gap Stack' feature: Model + HTMX API + UI Page.
+    Generates a 'List View' feature: Model + HTMX List API + Read-Only UI Page.
     Args:
         name: Singular feature name (e.g. 'task').
         fields: List of fields (e.g. ['title:string', 'is_done:boolean']).
@@ -158,21 +163,9 @@ def scaffold_feature(name: str, fields: List[str]):
     pascal_name = to_pascal_case(name)
     plural_name = to_plural(name)
     
-    # We manually use the internal logic or calling the function if possible, 
-    # but since they are decorated, we replicate the logic or call the underlying function if we separated them.
-    # For simplicity, we'll generate the API file directly here to ensure it's wired for THIS feature specifically.
-    
     api_filename = f"{plural_name}_list.php"
-    api_ctx = {
-        "name": f"{plural_name}_list",
-        "method": "GET",
-        "models": [pascal_name],
-        "auth_required": True
-    }
-    # We need a specialized template for a "List API" ideally, but we can use the generic one 
-    # and maybe inject a TODO comment about fetching the specific model data.
-    # Actually, let's create a specialized content for the API to make it useful immediately.
     
+    # Generate List API Content
     api_content = f"""<?php
 require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../csrf.php';
@@ -186,21 +179,20 @@ ${name}Model = new {pascal_name}($pdo);
 
 try {{
     // Fetch Data
-    // Note: You might want to filter by user_id if the model supports it
     $items = ${name}Model->getAll(); 
     
+    echo '<ul id="{name}-ul" class="space-y-2">';
     if (empty($items)) {{
-        echo '<p class="text-gray-500 italic">No {plural_name} found.</p>';
+        echo '<li class="text-gray-500 italic">No {plural_name} found.</li>';
     }} else {{
-        echo '<ul class="space-y-2">';
         foreach ($items as $item) {{
-            echo '<li class="p-3 bg-white shadow rounded flex justify-between">';
+            echo '<li class="p-3 bg-white shadow rounded flex justify-between border border-gray-100">';
             // Display the first non-id field
             echo '<span class="font-medium">' . htmlspecialchars(array_values($item)[1] ?? 'Item') . '</span>';
             echo '</li>';
         }}
-        echo '</ul>';
     }}
+    echo '</ul>';
 }} catch (Exception $e) {{
     http_response_code(500);
     echo 'Error loading data.';
@@ -213,7 +205,6 @@ try {{
     # 3. Create UI Page
     page_filename = f"{plural_name}.php"
     
-    # Use template instead of hardcoded string
     parsed_fields = parse_fields(fields)
     ctx = {
         "name": name,
@@ -222,42 +213,14 @@ try {{
         "fields": parsed_fields
     }
     
-    template = templates_env.get_template("feature_page.php.j2")
+    template = templates_env.get_template("list_page.php.j2")
     with open(os.path.join(PUBLIC_DIR, page_filename), "w") as f:
         f.write(template.render(ctx))
 
-    return f"Feature Scaffold Complete for '{name}'.\n1. Model: User.php\n2. API: src/public/api/{api_filename}\n3. UI: src/public/{page_filename}"
+    return f"List Scaffold Complete for '{name}'.\n1. Model: src/public/classes/{pascal_name}.php\n2. API: src/public/api/{api_filename}\n3. UI: src/public/{page_filename}"
 
 @mcp.tool()
-def scaffold_crud(name: str, fields: List[str]):
-    """
-    High-Level Macro: Generates BOTH a Model and a CRUD Page.
-    Args:
-        name: The singular snake_case name (e.g., 'todo_item').
-        fields: List of fields (e.g. ['title:string', 'is_done:boolean']).
-    """
-    # 1. Create Model
-    model_result = _create_model_internal(name, fields)
-    
-    # 2. Create CRUD Page
-    pascal_name = to_pascal_case(name)
-    plural_name = to_plural(name)
-    parsed_fields = parse_fields(fields)
-    
-    ctx = {
-        "name": name,
-        "pascal_name": pascal_name,
-        "plural_name": plural_name,
-        "fields": parsed_fields
-    }
-    
-    page_path = os.path.join(PUBLIC_DIR, f"{plural_name}.php")
-    template = templates_env.get_template("feature_page.php.j2")
-    
-    with open(page_path, "w") as f:
-        f.write(template.render(ctx))
-        
-    return f"Scaffold Complete.\n1. {model_result}\n2. Created CRUD Page: src/public/{plural_name}.php"
+def scaffold_auth():
 
 @mcp.tool()
 def scaffold_auth():

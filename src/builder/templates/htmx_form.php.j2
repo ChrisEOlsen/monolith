@@ -1,0 +1,38 @@
+        <!-- Form: {{ title }} -->
+        <div class="border border-gray-200 rounded p-6 mb-6 bg-white">
+            {% if title %}
+            <h3 class="text-lg font-bold mb-4">{{ title }}</h3>
+            {% endif %}
+            
+            <form hx-post="{{ api_endpoint }}" 
+                  hx-swap="none"
+                  @htmx:after-request="if(event.detail.successful) { alert('Success!'); $el.reset(); }"
+                  class="space-y-4">
+                
+                <input type="hidden" name="csrf_token" value="<?= generate_csrf_token() ?>">
+                
+                {% for field in fields %}
+                <div>
+                    <label class="block text-sm font-bold mb-1 capitalize" for="{{ field.name }}">{{ field.name | replace('_', ' ') }}</label>
+                    {% if field.type == 'boolean' %}
+                    <div class="flex items-center">
+                        <input type="checkbox" name="{{ field.name }}" id="{{ field.name }}" value="1" class="rounded border-gray-300 text-black focus:ring-black mr-2">
+                        <span class="text-sm text-gray-600">Yes</span>
+                    </div>
+                    {% elif field.type == 'textarea' %}
+                    <textarea name="{{ field.name }}" id="{{ field.name }}" rows="3" required
+                           class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-black"></textarea>
+                    {% else %}
+                    <input type="{{ field.type }}" name="{{ field.name }}" id="{{ field.name }}" required
+                           class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-black">
+                    {% endif %}
+                </div>
+                {% endfor %}
+                
+                <div class="flex justify-end">
+                    <button type="submit" class="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition">
+                        {{ submit_label }}
+                    </button>
+                </div>
+            </form>
+        </div>

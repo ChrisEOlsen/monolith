@@ -1,0 +1,55 @@
+<?php
+require_once 'db.php';
+require_once 'csrf.php';
+
+if (session_status() === PHP_SESSION_NONE) session_start();
+if (!isset($_SESSION['user_id'])) {
+    $_SESSION['auth_redirect_to'] = $_SERVER['REQUEST_URI'];
+    header("Location: /login.php");
+    exit;
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ pascal_name }} Manager</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <?php if (getenv('APP_ENV') === 'prod'): ?>
+        <link rel="stylesheet" href="/style.css">
+    <?php else: ?>
+        <script src="https://cdn.tailwindcss.com"></script>
+    <?php endif; ?>
+</head>
+<body class="bg-white font-sans text-gray-900">
+    <!-- Neutral Nav -->
+    <nav class="border-b border-gray-200 px-6 py-4 mb-8">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/" class="text-xl font-bold">MyApp</a>
+            <div class="flex items-center space-x-4">
+                <a href="/" class="hover:underline">Home</a>
+                <a href="/logout.php" class="text-sm hover:underline">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-6 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold">{{ plural_name | capitalize }}</h1>
+            <!-- Action buttons can be injected here later -->
+        </div>
+
+        <div class="border border-gray-200 rounded p-4 bg-white">
+            <!-- HTMX List Container -->
+            <div id="{{ name }}-list" 
+                 hx-get="/api/{{ plural_name }}_list.php" 
+                 hx-trigger="load"
+                 class="min-h-[100px]">
+                <span class="text-gray-400 italic">Loading...</span>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

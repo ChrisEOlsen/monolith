@@ -22,23 +22,23 @@ When the user asks for a feature (e.g., "Create a Project Manager"), you MUST fo
 
 ### 2. 🧱 Scaffold the Backbone
 *   **Think:** Is this a standard List/Create feature, or a custom Dashboard?
-*   **Option A (Standard CRUD):** Use `scaffold_crud(name='project', fields=['name:string', 'status:string'])`.
-    *   *Why?* It generates the Model AND the UI shell in one go.
+*   **Option A (Standard List):** Use `scaffold_list(name='project', fields=['name:string', 'status:string'])`.
+    *   *Why?* It generates the Model, List API, and Viewer Page (No Forms).
 *   **Option B (Custom):** 
     1.  Use `create_model(name='project', ...)` to get the secure PDO class.
     2.  Use `create_page(filename='dashboard.php', models=['Project'], auth_required=True)` to get the secure, empty Controller/View shell.
 *   **Option C (Authentication):**
-    *   Use `scaffold_auth()` to generate the `User` model, Login, and Logout pages. It automatically creates `users` and `login_attempts` tables.
-    *   (Optional) Use `scaffold_registration()` to allow public sign-ups with email validation.
+    *   Use `scaffold_auth()` to generate the `User` model, Login, and Logout pages.
+    *   (Optional) Use `scaffold_registration()` to allow public sign-ups.
 
 ### 3. 🎨 Paint the Interface
 *   **Think:** Now that the logic works, how should it look?
-*   **Action:** Edit the generated `.php` file (e.g., `src/public/projects.php`).
+*   **Action:** 
+    1.  **Add Forms:** Use `add_htmx_form(page='projects.php', api='/api/projects_create.php', ...)` to inject creation forms.
+    2.  **Edit PHP/HTML:** Edit the generated `.php` file manually or via AI.
 *   **Rule:** 
     *   Keep PHP logic at the top (Controller).
     *   Keep HTML at the bottom (View).
-    *   Use **Tailwind CSS** classes directly in the HTML.
-    *   Use **HTMX** for interactions (like `hx-post`, `hx-target`) instead of writing custom JS.
 
 ### 4. 💅 Final Polish
 *   **Action:** Run `build_css(minify=True)` to compile the Tailwind styles.
@@ -85,7 +85,8 @@ We follow a strict **HTMX-First** approach.
 | `create_page` | When you need a blank page. Use `auth_required=True` for protected pages. |
 | `create_internal_api` | Creates an endpoint for HTMX (HTML fragments) or JSON. |
 | `scaffold_auth` | Generates User model, Login, and Logout pages (No Registration). |
-| `scaffold_feature` | Generates Model + API + UI Page (Gap Stack compliant). |
+| `scaffold_list` | Generates Model + API + List Page (View Only). |
+| `add_htmx_form` | Injects a form into a page (Lego block style). |
 | `run_linter` | Runs PHP syntax check and security pattern matching. |
 | `scaffold_registration` | Adds `register.php` and links it to the login page. |
 | `build_css` | After editing HTML to apply Tailwind styles. |
