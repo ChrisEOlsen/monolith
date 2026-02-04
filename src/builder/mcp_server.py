@@ -143,11 +143,6 @@ def create_internal_api(name: str, method: str = "GET", models: List[str] = [], 
         
     return f"Created Internal API: src/public/api/{filename} (Method: {method}, Auth: {auth_required})"
 
-    with open(os.path.join(PUBLIC_DIR, page_filename), "w") as f:
-        f.write(template.render(ctx))
-
-    return f"List Scaffold Complete for '{name}'.\n1. Model: src/public/classes/{pascal_name}.php\n2. API: src/public/api/{api_filename}\n3. UI: src/public/{page_filename}"
-
 @mcp.tool()
 def scaffold_list(name: str, fields: List[str]):
     """
@@ -170,7 +165,7 @@ def scaffold_list(name: str, fields: List[str]):
 require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../csrf.php';
 
-// Auth Check
+# Auth Check
 if (session_status() === PHP_SESSION_NONE) session_start();
 if (!isset($_SESSION['user_id'])) {{ http_response_code(401); exit; }}
 
@@ -178,7 +173,7 @@ require_once __DIR__ . '/../classes/{pascal_name}.php';
 ${name}Model = new {pascal_name}($pdo);
 
 try {{
-    // Fetch Data
+    # Fetch Data
     $items = ${name}Model->getAll(); 
     
     echo '<ul id="{name}-ul" class="space-y-2">';
@@ -187,7 +182,7 @@ try {{
     }} else {{
         foreach ($items as $item) {{
             echo '<li class="p-3 bg-white shadow rounded flex justify-between border border-gray-100">';
-            // Display the first non-id field
+            # Display the first non-id field
             echo '<span class="font-medium">' . htmlspecialchars(array_values($item)[1] ?? 'Item') . '</span>';
             echo '</li>';
         }}
@@ -220,7 +215,47 @@ try {{
     return f"List Scaffold Complete for '{name}'.\n1. Model: src/public/classes/{pascal_name}.php\n2. API: src/public/api/{api_filename}\n3. UI: src/public/{page_filename}"
 
 @mcp.tool()
-def scaffold_auth():
+def add_htmx_form(page_filename: str, api_endpoint: str, fields: List[str], title: str = "Form", submit_label: str = "Save"):
+    """
+    Injects a neutral, CSRF-protected HTMX form into an existing page.
+    Args:
+        page_filename: The target PHP file (e.g., 'profile.php').
+        api_endpoint: The URL where the form posts (e.g., '/api/update_profile.php').
+        fields: List of fields (e.g. ['email:email', 'bio:textarea', 'is_active:boolean']).
+        title: Optional title for the form card.
+        submit_label: Label for the submit button.
+    """
+    # Parse fields
+    parsed_fields = parse_fields(fields)
+    
+    ctx = {
+        "api_endpoint": api_endpoint,
+        "fields": parsed_fields,
+        "title": title,
+        "submit_label": submit_label
+    }
+    
+    template = templates_env.get_template("htmx_form.php.j2")
+    form_html = template.render(ctx)
+    
+    page_path = os.path.join(PUBLIC_DIR, page_filename)
+    if not os.path.exists(page_path):
+        return f"Error: Page '{page_filename}' not found."
+        
+    try:
+        with open(page_path, "r") as f:
+            content = f.read()
+            
+        if "</main>" in content:
+            new_content = content.replace("</main>", f"{form_html}\n    </main>")
+            with open(page_path, "w") as f:
+                f.write(new_content)
+            return f"Successfully added form '{title}' to {page_filename}."
+        else:
+            return f"Error: Could not find </main> tag in {page_filename} to inject form."
+            
+    except Exception as e:
+        return f"Error modifying file: {str(e)}"
 
 @mcp.tool()
 def scaffold_auth():
@@ -428,6 +463,7 @@ def run_perl_script(script_name: str, args: List[str] = []):
         return f"Script Output:\n{result.stdout}\nErrors:\n{result.stderr}"
     except Exception as e:
         return f"Execution Error: {str(e)}"
+
 
 if __name__ == "__main__":
     mcp.run()
