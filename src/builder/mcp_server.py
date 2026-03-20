@@ -381,7 +381,8 @@ def scaffold_registration():
 @mcp.tool()
 def execute_sql(query: str):
     """
-    Executes a raw SQL query against the MySQL database.
+    Executes one or more semicolon-separated SQL queries against the MySQL database.
+    Returns a list of results for each query.
     """
     try:
         conn = mysql.connector.connect(
@@ -391,17 +392,25 @@ def execute_sql(query: str):
             database=DB_NAME
         )
         cursor = conn.cursor()
-        cursor.execute(query)
         
-        result = None
-        if cursor.with_rows:
-            result = cursor.fetchall()
+        # Split by semicolon and filter out empty strings
+        statements = [s.strip() for s in query.split(';') if s.strip()]
+        results = []
+        
+        for stmt in statements:
+            cursor.execute(stmt)
+            if cursor.with_rows:
+                results.append(cursor.fetchall())
+            else:
+                results.append(f"Affected rows: {cursor.rowcount}")
         
         conn.commit()
         cursor.close()
         conn.close()
         
-        return f"Query executed successfully. Result: {result}"
+        if len(results) == 1:
+            return f"Query executed successfully. Result: {results[0]}"
+        return f"Multiple queries executed successfully. Results: {results}"
     except Exception as e:
         return f"SQL Error: {str(e)}"
 

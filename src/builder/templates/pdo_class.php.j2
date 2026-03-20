@@ -32,6 +32,18 @@ class {{ pascal_name }} {
         $stmt->execute(['id' => $id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    public function update($id, $data) {
+        $fields = [];
+        $params = ['id' => $id];
+        foreach ($data as $key => $value) {
+            $fields[] = "$key = :$key";
+            $params[$key] = $value;
+        }
+        $sql = "UPDATE {{ plural_name }} SET " . implode(', ', $fields) . " WHERE id = :id";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute($params);
+    }
     
     public function delete($id) {
         $stmt = $this->pdo->prepare("DELETE FROM {{ plural_name }} WHERE id = :id");
