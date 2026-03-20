@@ -1,6 +1,7 @@
 import os
 import subprocess
 import mysql.connector
+import re
 from fastmcp import FastMCP
 from jinja2 import Environment, FileSystemLoader
 from typing import List, Optional
@@ -25,6 +26,16 @@ DB_USER = os.getenv("DB_USER", "user")
 DB_PASS = os.getenv("DB_PASS", "password")
 
 # --- Helper Functions ---
+def is_safe_identifier(name: str) -> bool:
+    """Check if a name is a safe alphanumeric identifier."""
+    return bool(re.match(r"^[a-zA-Z0-9_]+$", name))
+
+def is_safe_filename(filename: str) -> bool:
+    """Check if a filename is safe (no path traversal)."""
+    if ".." in filename or filename.startswith("/") or filename.startswith("\\"):
+        return False
+    return bool(re.match(r"^[a-zA-Z0-9_./-]+$", filename))
+
 def to_pascal_case(snake_case: str) -> str: 
     return "".join(word.capitalize() for word in snake_case.split('_'))
 
@@ -45,6 +56,9 @@ def parse_fields(fields: List[str]):
 
 def _create_model_internal(name: str, fields: List[str]) -> str:
     """Internal helper to create a model file."""
+    if not is_safe_identifier(name):
+        return f"Error: Invalid model name '{name}'. Only alphanumeric and underscore allowed."
+
     pascal_name = to_pascal_case(name)
     plural_name = to_plural(name)
     parsed_fields = parse_fields(fields)
@@ -89,6 +103,9 @@ def create_page(filename: str, title: str, models: List[str] = [], auth_required
         models: List of PascalCase model names to include and instantiate (e.g. ['User', 'Invoice']).
         auth_required: If True, adds a secure session check at the top of the file.
     """
+    if not is_safe_filename(filename):
+        return f"Error: Invalid filename '{filename}'. Path traversal not allowed."
+
     # Ensure filename ends in .php
     if not filename.endswith('.php'):
         filename += '.php'
@@ -462,6 +479,9 @@ def run_perl_script(script_name: str, args: List[str] = []):
     """
     Executes a Perl script located in the scripts directory.
     """
+    if not is_safe_filename(script_name):
+        return f"Error: Invalid script name '{script_name}'. Path traversal not allowed."
+
     script_path = os.path.join(SCRIPTS_DIR, script_name)
     if not os.path.exists(script_path):
         return f"Error: Script '{script_name}' not found in {SCRIPTS_DIR}"
