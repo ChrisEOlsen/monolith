@@ -43,7 +43,7 @@ try {
     // Return an HTML Fragment (e.g., <div>...</div>)
     ?>
     <div class="p-4 bg-white shadow rounded">
-        <h3 class="font-bold text-gray-800">Endpoint: {{ name }}</h3>
+        <h3 class="font-bold text-gray-800">Endpoint: {{ name | e }}</h3>
         <p class="text-sm text-gray-600">Timestamp: <?= date('H:i:s') ?></p>
     </div>
     <?php

@@ -8,7 +8,7 @@ class {{ pascal_name }} {
     }
 
     public function create($data) {
-        $sql = "INSERT INTO {{ plural_name }} ({% for field in fields %}{{ field.name }}{% if not loop.last %}, {% endif %}{% endfor %}) VALUES ({% for field in fields %}:{{ field.name }}{% if not loop.last %}, {% endif %}{% endfor %})";
+        $sql = "INSERT INTO `{{ plural_name }}` ({% for field in fields %}`{{ field.name }}`{% if not loop.last %}, {% endif %}{% endfor %}) VALUES ({% for field in fields %}:{{ field.name }}{% if not loop.last %}, {% endif %}{% endfor %})";
         $stmt = $this->pdo->prepare($sql);
         
         {% for field in fields %}
@@ -23,12 +23,12 @@ class {{ pascal_name }} {
     }
 
     public function getAll() {
-        $stmt = $this->pdo->query("SELECT * FROM {{ plural_name }}");
+        $stmt = $this->pdo->query("SELECT * FROM `{{ plural_name }}`");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function find($id) {
-        $stmt = $this->pdo->prepare("SELECT * FROM {{ plural_name }} WHERE id = :id");
+        $stmt = $this->pdo->prepare("SELECT * FROM `{{ plural_name }}` WHERE id = :id");
         $stmt->execute(['id' => $id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
@@ -37,16 +37,19 @@ class {{ pascal_name }} {
         $fields = [];
         $params = ['id' => $id];
         foreach ($data as $key => $value) {
-            $fields[] = "$key = :$key";
+            // Basic key validation: allow only alphanumeric and underscore
+            if (!preg_match('/^[a-zA-Z0-9_]+$/', $key)) continue;
+            
+            $fields[] = "`$key` = :$key";
             $params[$key] = $value;
         }
-        $sql = "UPDATE {{ plural_name }} SET " . implode(', ', $fields) . " WHERE id = :id";
+        $sql = "UPDATE `{{ plural_name }}` SET " . implode(', ', $fields) . " WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute($params);
     }
     
     public function delete($id) {
-        $stmt = $this->pdo->prepare("DELETE FROM {{ plural_name }} WHERE id = :id");
+        $stmt = $this->pdo->prepare("DELETE FROM `{{ plural_name }}` WHERE id = :id");
         return $stmt->execute(['id' => $id]);
     }
 }

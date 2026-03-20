@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 {% set content %}
 <div class="container mx-auto py-8">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold">{{ page_title }}</h1>
+        <h1 class="text-3xl font-bold">{{ page_title | e }}</h1>
         {% if auth_required %}
         <div class="flex items-center space-x-4">
             <span class="text-sm text-gray-600">User: <?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Guest'); ?></span>
@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ page_title }}</title>
+    <title>{{ page_title | e }}</title>
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <!-- Alpine.js -->

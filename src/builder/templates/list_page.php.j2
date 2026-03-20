@@ -14,7 +14,7 @@ if (!isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ pascal_name }} Manager</title>
+    <title>{{ pascal_name | e }} Manager</title>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <?php if (getenv('APP_ENV') === 'prod'): ?>
@@ -37,14 +37,14 @@ if (!isset($_SESSION['user_id'])) {
 
     <main class="container mx-auto px-6 py-8">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold">{{ plural_name | capitalize }}</h1>
+            <h1 class="text-3xl font-bold">{{ plural_name | capitalize | e }}</h1>
             <!-- Action buttons can be injected here later -->
         </div>
 
         <div class="border border-gray-200 rounded p-4 bg-white">
             <!-- HTMX List Container -->
-            <div id="{{ name }}-list" 
-                 hx-get="/api/{{ plural_name }}_list.php" 
+            <div id="{{ name | e }}-list" 
+                 hx-get="/api/{{ plural_name | e }}_list.php" 
                  hx-trigger="load"
                  class="min-h-[100px]">
                 <span class="text-gray-400 italic">Loading...</span>
