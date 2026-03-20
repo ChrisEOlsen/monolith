@@ -1,4 +1,17 @@
 <?php
+
+// Secure Session Configuration
+if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        "lifetime" => 0,
+        "path" => "/",
+        "domain" => "", // Default to current domain
+        "secure" => isset($_SERVER["HTTPS"]),
+        "httponly" => true,
+        "samesite" => "Lax"
+    ]);
+    session_start();
+}
 $host = getenv('DB_HOST') ?: 'db';
 $db   = getenv('DB_NAME') ?: 'myapp';
 $user = getenv('DB_USER') ?: 'user';

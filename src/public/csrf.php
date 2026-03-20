@@ -16,3 +16,12 @@ function verify_csrf_token($token) {
     }
     return hash_equals($_SESSION['csrf_token'], $token);
 }
+
+/**
+ * Validate if a URL is internal to prevent Open Redirects.
+ */
+function is_internal_url($url) {
+    if (empty($url)) return false;
+    // Must start with / and not contain // (which could be protocol-relative)
+    return str_starts_with($url, '/') && !str_starts_with($url, '//');
+}
