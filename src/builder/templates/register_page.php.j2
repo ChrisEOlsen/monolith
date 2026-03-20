@@ -4,8 +4,27 @@ require_once __DIR__ . '/csrf.php';
 require_once __DIR__ . '/classes/User.php';
 
 $error = null;
+$ip_address = $_SERVER['REMOTE_ADDR'];
+$max_attempts = 5;
+$lockout_time = 15; // minutes
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+// 1. Check Rate Limit
+$stmt = $pdo->prepare("SELECT * FROM login_attempts WHERE ip_address = :ip");
+$stmt->execute(['ip' => $ip_address]);
+$attempt = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if ($attempt && $attempt['locked_until']) {
+    if (strtotime($attempt['locked_until']) > time()) {
+        $wait = ceil((strtotime($attempt['locked_until']) - time()) / 60);
+        $error = "Too many registration attempts. Please try again in $wait minutes.";
+    } else {
+        // Unlock
+        $pdo->prepare("UPDATE login_attempts SET attempts = 0, locked_until = NULL WHERE ip_address = :ip")->execute(['ip' => $ip_address]);
+        $attempt = null;
+    }
+}
+
+if (!$error && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
         die("CSRF validation failed");
     }
@@ -34,6 +53,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
 
             if ($created) {
+                // Success: Reset attempts
+                $pdo->prepare("DELETE FROM login_attempts WHERE ip_address = :ip")->execute(['ip' => $ip_address]);
+
                 // Auto login after registration
                 $user = $userModel->findByEmail($email);
                 session_regenerate_id(true);
@@ -48,7 +70,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header("Location: " . $redirect);
                 exit;
             } else {
-                $error = "Registration failed. Please try again.";
+                // Failure: Increment attempts
+                if ($attempt) {
+                    $new_attempts = $attempt['attempts'] + 1;
+                    if ($new_attempts >= $max_attempts) {
+                        $locked_until = date('Y-m-d H:i:s', strtotime("+$lockout_time minutes"));
+                        $pdo->prepare("UPDATE login_attempts SET attempts = :attempts, locked_until = :locked WHERE ip_address = :ip")
+                            ->execute(['attempts' => $new_attempts, 'locked' => $locked_until, 'ip' => $ip_address]);
+                        $error = "Too many registration attempts. Please try again in $lockout_time minutes.";
+                    } else {
+                        $pdo->prepare("UPDATE login_attempts SET attempts = :attempts WHERE ip_address = :ip")
+                            ->execute(['attempts' => $new_attempts, 'ip' => $ip_address]);
+                         $error = "Registration failed. Please try again.";
+                    }
+                } else {
+                    $pdo->prepare("INSERT INTO login_attempts (ip_address, attempts) VALUES (:ip, 1)")
+                        ->execute(['ip' => $ip_address]);
+                     $error = "Registration failed. Please try again.";
+                }
             }
         }
     }
