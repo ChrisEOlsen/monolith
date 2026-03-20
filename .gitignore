@@ -18,4 +18,4 @@ venv/
 
 # PHP
 /vendor/
-composer.lock
+composer.lock.worktrees/
