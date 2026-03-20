@@ -45,6 +45,9 @@ if (!$error && $_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Redirect to intended destination or home
         $redirect = $_SESSION['auth_redirect_to'] ?? '/index.php';
+        if (!is_internal_url($redirect)) {
+            $redirect = '/index.php';
+        }
         unset($_SESSION['auth_redirect_to']);
         header("Location: " . $redirect);
         exit;
