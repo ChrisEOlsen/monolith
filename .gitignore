@@ -19,3 +19,6 @@ venv/
 # PHP
 /vendor/
 composer.lock.worktrees/
+
+graphify-out
+

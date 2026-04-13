@@ -18,6 +18,8 @@ These are the tools that I always use, that I want the full automated workflow t
 
 - OpenRouter API: This is what will be used whenever there are AI features - which will usually be involed in some way shape or form.
 
+- Context7 MCP server: This will be used whenever there is an external API that will be used for application features in order to ensure up to date info for how to implement.
+
 - Uncodixify skill: These are the design principles that will be used when developing the application.
 
 - Consider the CLAUDE.md file. Currently, there is a CLAUDE.md file which outlines how the LLM should go about building the project and the design principles used to develop the application - very important that these prinicples are preserved throughout this automated workflow that we are about to create. 
@@ -39,4 +41,4 @@ I just want the LLM to get back to me when the thing is done. Ensure that the su
 
 6. Once the superpowers plugin has done its thing the second time, and the code has been implemented and tested - the developer can be informed that the application is done and running on localhost at a specified port (all of those things will be in the .env file)
 
-7. Once the developer has approved of the application, the developer should then explicitly call a SKILL.md file called /launch, which makes use of the cloudflare mcp server to create a tunnel, connect the specified domain to it and rebuild the docker containers.
+7. Once the developer has approved of the application, the developer should then explicitly call a SKILL.md file called /launch, which makes use of the cloudflare mcp server to create a tunnel, connect the specified domain to it and rebuild the docker containers. Together with this step I want the graphify plugin to automatically be triggered so that the whole obsidian graph is created.

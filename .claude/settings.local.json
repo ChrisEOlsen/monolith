@@ -13,7 +13,11 @@
       "Bash(python3 -m json.tool /Users/crispychris/Desktop/repos/ai-first-php-monolith/.claude/settings.local.json)",
       "Bash(git checkout:*)",
       "Bash(git pull:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(git branch:*)",
+      "Bash(python3 -c \"import graphify\")",
+      "Bash(pip install:*)",
+      "Bash(python3:*)"
     ]
   }
 }
