@@ -20,7 +20,29 @@ If any are missing, **STOP** and tell the developer:
 
 ---
 
-## Step 2: Cloudflare Tunnel
+## Step 2: Add Cloudflare Tunnel to docker-compose.yml
+
+Check if `docker-compose.yml` already has a `cloudflared:` service. If not, append it.
+
+Read `docker-compose.yml` and add the following service under `services:`, before the closing `volumes:` or `networks:` block:
+
+```yaml
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    networks:
+      - default
+    depends_on:
+      - app
+```
+
+If the service already exists, skip this step.
+
+---
+
+## Step 3: Cloudflare Tunnel
 
 Use the Cloudflare MCP server tools to:
 
@@ -29,7 +51,7 @@ Use the Cloudflare MCP server tools to:
 
 ---
 
-## Step 3: Rebuild Containers
+## Step 4: Rebuild Containers
 
 Run:
 
@@ -41,7 +63,7 @@ Wait for the containers to come up cleanly before continuing.
 
 ---
 
-## Step 4: Knowledge Graph
+## Step 5: Knowledge Graph
 
 Use the `graphify` skill on `src/public/`.
 
@@ -49,7 +71,7 @@ This generates a navigable knowledge graph of the application codebase, suitable
 
 ---
 
-## Step 5: Report
+## Step 6: Report
 
 Tell the developer:
 
