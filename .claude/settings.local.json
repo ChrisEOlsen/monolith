@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/crispychris/.claude/**)",
+      "Read(//Users/crispychris/.claude/plugins/**)",
+      "Read(//Users/crispychris/.claude/skills/**)",
+      "Bash(python3 -m json.tool)",
+      "Bash(gh api:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(python3 -m json.tool /Users/crispychris/Desktop/repos/ai-first-php-monolith/.claude/settings.local.json)"
+    ]
+  },
+  "mcpServers": {
+    "cloudflare": {
+      "command": "npx",
+      "args": ["-y", "@cloudflare/mcp-server-cloudflare"],
+      "env": {
+        "CLOUDFLARE_API_TOKEN": "${CLOUDFLARE_API_TOKEN}"
+      }
+    }
+  }
+}
