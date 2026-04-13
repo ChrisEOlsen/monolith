@@ -22,3 +22,7 @@ composer.lock.worktrees/
 
 graphify-out
 
+# Security reports (local only — do not expose vulnerabilities on GitHub)
+.security/
+.gemini_security/
+
