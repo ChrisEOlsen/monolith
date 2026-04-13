@@ -10,16 +10,10 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(git add:*)",
       "Bash(git commit -m ':*)",
-      "Bash(python3 -m json.tool /Users/crispychris/Desktop/repos/ai-first-php-monolith/.claude/settings.local.json)"
+      "Bash(python3 -m json.tool /Users/crispychris/Desktop/repos/ai-first-php-monolith/.claude/settings.local.json)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(git merge:*)"
     ]
-  },
-  "mcpServers": {
-    "cloudflare": {
-      "command": "npx",
-      "args": ["-y", "@cloudflare/mcp-server-cloudflare"],
-      "env": {
-        "CLOUDFLARE_API_TOKEN": "${CLOUDFLARE_API_TOKEN}"
-      }
-    }
   }
 }
