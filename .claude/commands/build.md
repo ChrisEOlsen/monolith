@@ -1,17 +1,27 @@
 ---
 description: Build a new PHP application from SEED.md — full automated workflow from spec to running app
+allowed-tools: Bash(cat .env), Bash(cat SEED.md), Bash(docker compose ps), Bash(docker compose up *), Bash(docker compose down *), Bash(docker logs *), Bash(git *), Bash(stripe *), Bash(kill *), Bash(sleep *), Bash(grep *), Bash(rm -f *)
+---
+
+## Pre-loaded Context
+
+- **SEED.md contents:** !`cat SEED.md 2>/dev/null || echo "MISSING"`
+- **Environment vars:** !`cat .env 2>/dev/null || echo "MISSING"`
+- **Docker status:** !`docker compose ps 2>/dev/null`
+
 ---
 
 You are running the automated build workflow for this PHP monolith. Follow these steps exactly in order. Do not skip steps. Do not proceed past a STOP condition.
 
+The SEED.md and .env contents are already loaded above — do not re-read them.
+
 ---
 
-## Step 1: Read SEED.md
+## Step 1: Validate Pre-loaded Context
 
-Read the file `SEED.md` at the project root.
+Using the pre-loaded context above:
 
-If SEED.md does not exist or is completely empty, **STOP** and tell the developer:
-
+If SEED.md shows `MISSING` or is empty, **STOP**:
 > "SEED.md is missing. The template is already in the repo — fill in your project details and run /build again."
 
 Extract and note:
@@ -22,13 +32,12 @@ Extract and note:
 
 ## Step 2: Env Var Check
 
-Read the `.env` file. If it does not exist, tell the developer:
+Using the pre-loaded `.env` above:
 
+If `.env` shows `MISSING`, **STOP**:
 > "No .env file found. Run: `cp env.example .env` then fill in your values."
 
-Then **STOP**.
-
-If `.env` exists, check that each required var is present AND non-empty based on the SEED.md checkboxes:
+Check that each required var is present AND non-empty based on the SEED.md checkboxes:
 
 | Integration checked | Required vars |
 |---------------------|--------------|
