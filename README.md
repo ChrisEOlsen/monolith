@@ -1,146 +1,173 @@
-# Modern PHP Monolith (MCP-Native)
+# Modern PHP Monolith — AI-First Project Factory
 
-**The "Token Efficient" Stack for AI-Driven Development.**
-
-This project is a rejection of modern complexity in favor of AI scalability. It implements a **Self-Replicating Monolith** where the AI Agent (running via MCP) lives *inside* the container, generating the very code that runs the application.
-
-By combining the stability of **PHP 8.2** with the generative power of **Python + Jinja2**, and the interactivity of **HTMX**, we achieve a development loop with zero build steps, zero hydration errors, and maximum speed.
-
-## 🧠 The Core Philosophy
-
-### 1. Token Efficiency (The "Fuel" of AI)
-In a traditional stack (Next.js + FastAPI), an AI agent must read 2,000+ tokens (Pydantic schemas, React props, API clients) just to understand a single feature.
-* **This Stack:** The AI reads ~300 tokens. Logic, Data, and View are often in a single file or tightly coupled.
-* **Result:** You fit **6x more features** into the AI's context window before it starts hallucinating. The patterns are linear, predictable, and "low perplexity."
-
-### 2. Pattern Enforcement (Safety by Design)
-Because we use **Jinja2 Templates** to generate code, the LLM never writes structural code from scratch—it only fills in the blanks.
-* **Consistency:** Every single generated page follows the exact same architecture, naming convention, and layout. No more "spaghetti code" drift where the AI switches coding styles halfway through a project.
-* **Security Guardrails:** The AI *cannot* write insecure SQL queries because the `class.php.j2` template hard-codes PDO Prepared Statements. The template enforces the security standard, not the prompt.
-
-### 3. API Supremacy (Integration Made Easy)
-PHP is the "Lingua Franca" of the web. Services like Stripe, Google, and AWS treat PHP as a first-class citizen with battle-tested SDKs that just work.
-* **No "Glue" Code:** Authentication is handled via simple server-side Sessions, eliminating complex JWT/Frontend state synchronization.
-* **Zero CORS Nightmares:** Your backend serves your frontend. API requests are local, meaning no pre-flight checks or cross-origin errors.
-
-### 4. The "Training Data" Advantage
-Large Language Models (LLMs) like Gemini and Claude have been trained on 25 years of PHP code—likely the largest corpus of web code in existence.
-* **The Reality:** LLMs are statistically better at writing standard PHP/SQL than they are at writing the latest experimental Next.js App Router hooks.
-* **The Benefit:** When you ask for a feature, the AI gets it right the first time because it's speaking its "native language."
-
-### 5. Less is More (Zero Build Step)
-We removed the fragility of the modern web:
-* ❌ No `node_modules` (1GB+ of dependencies).
-* ❌ No Webpack/Vite build steps.
-* ❌ No "Hydration" or "Client/Server State" sync issues.
-* ✅ **Just Files.** The AI writes a file, Apache serves it. You hit Refresh.
-
-## 🚀 Features
-
-* **Runtime:** PHP 8.2 + Apache (The "Engine").
-* **Builder:** Python + FastMCP + Jinja2 (The "Factory" inside the container).
-* **Frontend:** HTML + HTMX + Tailwind CSS (No JavaScript framework required).
-* **Database:** MySQL 8.0 with PDO (Secure, raw SQL power).
-* **Admin:** phpMyAdmin included for visual database management.
-* **Edge:** Traefik + Cloudflare Tunnel (Enterprise-grade security, zero port forwarding).
-
-## 🏗️ Architecture: "The Factory in the Building"
-
-Unlike distributed microservices, this stack runs as a **Unified Monolith**.
-
-```text
-/mcp-monolith
- ├── src/
- │   ├── builder/        # 🔒 The AI's Workshop (Python + Jinja Templates)
- │   │   ├── mcp_server.py
- │   │   └── templates/  # "Golden Templates" for secure code gen
- │   ├── public/         # 🌍 The Live Application (PHP + HTML)
- │   │   ├── index.php
- │   │   └── style.css
- └── docker-compose.yml  # Orchestrates the magic
-```
-
-1. **The Prompt:** You tell the AI: _"Create a User Profile page."_
-    
-2. **The Action:** The **Builder** (Python) reads a `layout.php.j2` blueprint, fills it with logic, and writes `profile.php` to the **Public** folder.
-    
-3. **The Result:** Apache serves the file immediately. HTMX handles the interactions.
-    
-
-## 🏁 Getting Started
-
-### Prerequisites
-
-- **gemini-cli:** Install via npm:
-  ```bash
-  npm install -g @google/gemini-cli
-  ```
-- **Docker & Docker Compose:** Ensure Docker Engine is installed and running.
-- **A Cloudflare Tunnel Token** (optional, for public access)
-    
-
-### Installation
-
-1. **Clone the repository:**
-    
-    ```bash
-    git clone https://github.com/ChrisEOlsen/ai-first-php-monolith.git
-    cd ai-first-php-monolith
-    ```
-    
-2. **Start the Monolith:**
-    
-    ```bash
-    docker compose up -d --build
-    ```
-    
-3. **Access the Application:**
-    
-    - **App:** `http://localhost`
-    - **Database Admin:** `http://localhost:8080` (phpMyAdmin)
-
-4. **Verify MCP Tools:**
-    Open the `gemini` CLI and run the `/mcp` command to ensure the tools are detected.
-    
-    > **Note:** Ensure the Docker container is running **before** you open the `gemini` CLI so that it can successfully connect to the MCP server.
-        
-
-## 🤖 MCP Integration
-
-To enable your AI agent (Claude Desktop, Cursor, Gemini CLI) to build this project, add this configuration.
-
-Note: We execute the MCP server INSIDE the running container to give the AI direct access to the environment.
-
-**`settings.json`:**
-
-```json
-"php-monolith-builder": {
-  "command": "docker",
-  "args": [
-    "exec",
-    "-i",
-    "-u",
-    "www-data",
-    "php-monolith-app",
-    "/opt/builder_venv/bin/python",
-    "/var/www/html/builder/mcp_server.py"
-  ]
-}
-```
-
-## 🛡️ Security
-
-- **Supply Chain:** We use **Zero** npm dependencies. The attack surface is limited to the OS and PHP, both of which are stable and patched.
-- **SQL Injection:** The AI uses "Golden Templates" that enforce PDO Prepared Statements.
-- **Isolation:** The `builder/` directory is outside the Apache `DocumentRoot`. The internet cannot see your blueprints.
-    
-
-## 📜 License
-
-MIT
+A self-replicating PHP application factory driven by Claude Code. Describe what you want to build in `SEED.md`, run `/build`, and an orchestrated AI workflow handles the rest — database design, scaffolding, UI, security analysis, and deployment.
 
 ---
 
-**Deployment Note:**
-- **Public Domain:** For launching on a public domain, the recommended approach is to use a server with a working **Traefik** instance and a **Cloudflare Tunnel**.
-- **Personal Use:** For personal use only, launch it on a server and connect your devices via **Tailscale**.
+## The Core Idea
+
+Most AI-assisted dev stacks fight the AI. Thousands of tokens spent on framework boilerplate, hydration edge cases, and type glue before a single line of product logic gets written.
+
+This stack is designed *for* LLMs:
+
+- **~300 tokens** to understand any feature vs. 2,000+ in a Next.js/FastAPI stack
+- **No structural code written from scratch** — Jinja2 templates enforce architecture, PDO, and security patterns
+- **25 years of PHP training data** — LLMs write correct PHP/SQL on the first attempt, reliably
+- **One file = one feature** — controller logic at the top, HTML at the bottom, no client/server state sync
+
+The AI doesn't scaffold around your stack. The stack is built for the AI.
+
+---
+
+## The Workflow
+
+### `/build` — Build from a prompt
+
+Fill `SEED.md` with your app idea. Then:
+
+```
+/build
+```
+
+The workflow runs automatically:
+
+1. Reads `SEED.md` + validates `.env`
+2. Brainstorming session (you approve the scope)
+3. Generates a feature-by-feature build plan
+4. Spins up a git worktree for the feature branch
+5. Builds each feature using the Golden Recipe (DB → scaffold → UI → CSS)
+6. Runs SAST security analysis on all generated code
+7. Fixes any findings, then reports for review
+
+### `/launch` — Deploy to the internet
+
+After reviewing the running app on localhost:
+
+```
+/launch
+```
+
+Adds a Cloudflare tunnel container to your stack, rebuilds, and generates a knowledge graph of the codebase.
+
+---
+
+## The Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Runtime | PHP 8.2 + Apache |
+| Database | MySQL 8.0 (PDO prepared statements only) |
+| Frontend | HTMX + Alpine.js + Tailwind CSS |
+| Code Generator | Python + FastMCP + Jinja2 (inside the container) |
+| Admin | phpMyAdmin |
+| Deployment | Cloudflare Tunnel (zero port forwarding) |
+
+**No Node.js. No build steps. No hydration. No CORS. Write a file, Apache serves it.**
+
+---
+
+## The Tool Chain
+
+The `/build` workflow orchestrates a set of specialized tools:
+
+| Tool | Role |
+|------|------|
+| **superpowers** (Claude Code plugin) | Brainstorming, planning, worktrees, subagent execution |
+| **php-monolith-builder** (MCP, runs in Docker) | `execute_sql`, `scaffold_crud`, `create_model`, `create_page`, `add_htmx_form`, `build_css`, and more |
+| **uncodixify** (skill) | Enforces Linear/Stripe/GitHub design standard — blocks gradient dashboards, glassmorphism, and other AI UI defaults |
+| **graphify** (skill) | Generates a navigable Obsidian knowledge graph of the finished app |
+| **Stripe MCP** | Native Stripe integration via `mcp.stripe.com` |
+| **context7** (MCP) | Pulls live library documentation into context during development |
+| **/security:analyze** (command) | Two-pass SAST scan of all generated PHP — finds XSS, SQLi, path traversal, CSRF, auth bypass |
+
+---
+
+## Architecture
+
+```
+ai-first-php-monolith/
+├── src/
+│   ├── builder/          # AI's workshop — Python MCP server + Jinja2 templates
+│   │   ├── mcp_server.py
+│   │   └── templates/    # "Golden Templates": enforce security, architecture, naming
+│   └── public/           # Live application — PHP + HTML served by Apache
+│       └── index.php
+├── .claude/
+│   ├── commands/
+│   │   ├── build.md      # /build orchestrator
+│   │   ├── launch.md     # /launch deployer
+│   │   └── security/
+│   │       └── analyze.md # two-pass SAST
+│   └── settings.local.json
+├── docker-compose.yml
+├── SEED.md               # Describe your app here
+├── CHECKLIST.md          # Setup checklist
+└── install.sh            # One-command machine setup
+```
+
+The `builder/` directory sits outside Apache's `DocumentRoot`. The internet cannot access the templates or MCP server — only the generated files in `public/` are served.
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Docker Engine (running)
+- Claude Code — `npm install -g @anthropic-ai/claude-code`
+
+### Setup
+
+Clone the repo and run the installer:
+
+```bash
+git clone https://github.com/ChrisEOlsen/ai-first-php-monolith.git my-project
+cd my-project
+./install.sh
+```
+
+`install.sh` handles:
+- Installing the graphify and uncodixify Claude Code skills
+- Registering the superpowers plugin in `~/.claude/settings.json`
+- Registering the php-monolith-builder and Stripe MCP servers
+- Copying `env.example` → `.env` if missing
+- Running `docker compose up -d --build`
+
+After the script completes:
+
+1. Open Claude Code: `claude`
+2. Authenticate the Stripe MCP: `/mcp` → follow the OAuth prompt (one-time)
+3. Fill in `SEED.md` and `.env`
+4. Run `/build`
+
+See `CHECKLIST.md` for the full step-by-step.
+
+---
+
+## The Golden Recipe
+
+Every feature follows the same sequence — enforced by `CLAUDE.md`:
+
+1. **Database first** — `execute_sql` creates the table with PDO-safe schema
+2. **Scaffold** — `scaffold_list`, `scaffold_crud`, or `create_model` + `create_page`
+3. **Paint the UI** — `add_htmx_form` + uncodixify design standard
+4. **Compile** — `build_css` with Tailwind
+
+The AI fills in the blanks. The templates enforce the structure.
+
+---
+
+## Security
+
+- **SQL injection** — impossible via the generated Models; PDO prepared statements are baked into the Jinja2 template
+- **CSRF** — token verification installed in every generated form
+- **XSS** — `htmlspecialchars` enforced in templates; `run_linter` catches raw output
+- **Auth** — sessions with `HttpOnly`, `Secure`, `SameSite=Lax`; login rate-limited (5 attempts / 15 min)
+- **Supply chain** — zero npm dependencies; attack surface limited to PHP and the OS
+- **SAST** — `/security:analyze` runs after every `/build` before you see the result
+
+---
+
+## License
+
+MIT

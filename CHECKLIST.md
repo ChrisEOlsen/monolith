@@ -10,10 +10,8 @@ Only do these once per server/machine. Skip if already done.
 
 - [ ] **Claude Code installed** — `npm install -g @anthropic-ai/claude-code`
 - [ ] **Docker installed and running**
-- [ ] **superpowers plugin installed** in Claude Code
-- [ ] **graphify skill installed** in `~/.claude/skills/graphify/`
-- [ ] **uncodixify skill installed** in `~/.claude/skills/uncodixify/`
-- [ ] **Global `~/.claude/settings.json`** has `php-monolith-builder` and `stripe` MCP servers registered (see README.md)
+- [ ] **Run `./install.sh`** from the project root — installs superpowers, graphify, uncodixify, configures MCP servers, and starts Docker
+- [ ] **Authenticate Stripe MCP** — open Claude Code, run `/mcp`, find the `stripe` server and follow the OAuth login prompt in your browser (one-time auth, persists across sessions)
 
 ---
 
