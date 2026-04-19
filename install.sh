@@ -82,13 +82,12 @@ curl -fsSL "https://raw.githubusercontent.com/cyxzdev/Uncodixfy/main/SKILL.md" \
     > "$CLAUDE_DIR/skills/uncodixify/SKILL.md"
 ok "uncodixify SKILL.md installed"
 
-# ── 3. Superpowers plugin + MCP servers → ~/.claude/settings.json ─────────────
+# ── 3. Superpowers + Stripe → ~/.claude/settings.json (global, not project-specific) ──
 step "Configuring ~/.claude/settings.json"
 
-python3 - "$CONTAINER_NAME" <<'PYEOF'
+python3 - <<'PYEOF'
 import json, os, sys
 
-container = sys.argv[1]
 settings_path = os.path.expanduser("~/.claude/settings.json")
 
 try:
@@ -105,34 +104,58 @@ if "superpowers@claude-plugins-official" not in settings["enabledPlugins"]:
 else:
     print("  - superpowers already registered, skipping")
 
-# ── php-monolith-builder MCP ──
+# ── Stripe MCP (global — not project-specific) ──
 settings.setdefault("mcpServers", {})
-settings["mcpServers"]["php-monolith-builder"] = {
-    "command": "docker",
-    "args": [
-        "exec", "-i", "-u", "www-data",
-        container,
-        "/opt/builder_venv/bin/python",
-        "/var/www/html/builder/mcp_server.py"
-    ]
-}
-print(f"  + php-monolith-builder MCP → {container}")
-
-# ── Stripe MCP ──
-settings["mcpServers"]["stripe"] = {
-    "type": "http",
-    "url": "https://mcp.stripe.com/v1/sse"
-}
-print("  + stripe MCP → mcp.stripe.com")
+if "stripe" not in settings["mcpServers"]:
+    settings["mcpServers"]["stripe"] = {
+        "type": "http",
+        "url": "https://mcp.stripe.com/v1/sse"
+    }
+    print("  + stripe MCP → mcp.stripe.com")
+else:
+    print("  - stripe MCP already registered, skipping")
 
 with open(settings_path, "w") as f:
     json.dump(settings, f, indent=2)
     f.write("\n")
 PYEOF
 
-ok "settings.json updated"
+ok "~/.claude/settings.json updated"
 
-# ── 4. .env setup ─────────────────────────────────────────────────────────────
+# ── 4. php-monolith-builder → .mcp.json (project-scoped, container name is dynamic) ──
+step "Generating .mcp.json"
+
+python3 - "$CONTAINER_NAME" "$SCRIPT_DIR" <<'PYEOF'
+import json, sys, os
+
+container   = sys.argv[1]
+project_dir = sys.argv[2]
+mcp_path    = os.path.join(project_dir, ".mcp.json")
+
+config = {
+    "mcpServers": {
+        "php-monolith-builder": {
+            "command": "docker",
+            "args": [
+                "exec", "-i", "-u", "www-data",
+                container,
+                "/opt/builder_venv/bin/python",
+                "/var/www/html/builder/mcp_server.py"
+            ]
+        }
+    }
+}
+
+with open(mcp_path, "w") as f:
+    json.dump(config, f, indent=2)
+    f.write("\n")
+
+print(f"  + .mcp.json → php-monolith-builder via {container}")
+PYEOF
+
+ok ".mcp.json generated (project-scoped)"
+
+# ── 5. .env setup ─────────────────────────────────────────────────────────────
 step "Checking .env"
 
 if [ ! -f "$ENV_FILE" ]; then
@@ -143,7 +166,7 @@ else
     ok ".env already exists"
 fi
 
-# ── 5. Docker ─────────────────────────────────────────────────────────────────
+# ── 6. Docker ─────────────────────────────────────────────────────────────────
 step "Starting Docker containers"
 
 cd "$SCRIPT_DIR"
