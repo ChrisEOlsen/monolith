@@ -91,17 +91,19 @@ When all tasks are complete, ensure all worktree changes are merged to the featu
 
 ---
 
-## Step 6b: Stripe Webhook Registration (only if Stripe checked)
+## Step 6b: Stripe Webhook Registration + Automated Local Testing (only if Stripe checked)
 
 Skip this step if `[x] Payments (Stripe)` was not checked in SEED.md.
 
-Use the Stripe MCP to register a webhook endpoint pointing at:
+Read `APP_DOMAIN` and `APP_PORT` from `.env`.
+
+### 1. Register production webhook
+
+Use the Stripe MCP to register a webhook endpoint:
 
 ```
 https://[APP_DOMAIN]/api/stripe_webhook.php
 ```
-
-Read `APP_DOMAIN` from `.env`.
 
 Register for these events at minimum (add more if the app spec requires):
 - `payment_intent.succeeded`
@@ -109,19 +111,60 @@ Register for these events at minimum (add more if the app spec requires):
 - `customer.subscription.updated`
 - `customer.subscription.deleted`
 
-After registration, Stripe will return a webhook signing secret. **STOP** and tell the developer:
+Save the returned production signing secret — you will write it to `.env` at the end of this step.
 
-> "Stripe webhook registered. Add the production signing secret to your `.env`:
->
-> ```
-> STRIPE_WEBHOOK_SECRET=whsec_...
-> ```
->
-> **For local testing before launch:** run `stripe listen --forward-to localhost:[APP_PORT]/api/stripe_webhook.php` in a separate terminal — it prints a different local secret. Swap that into `.env` while testing locally, then restore the production secret before running `/launch`.
->
-> Confirm once `.env` is updated to continue."
+### 2. Verify webhook registration via Stripe MCP
 
-Wait for developer confirmation before proceeding to Step 7.
+Use the Stripe MCP to retrieve the webhook endpoint just created. Confirm:
+- URL matches `https://[APP_DOMAIN]/api/stripe_webhook.php`
+- All registered events are present in the response
+
+If verification fails, re-register and re-verify before continuing.
+
+### 3. Start local stripe listener
+
+Run in background, capturing output to a temp file:
+
+```bash
+stripe listen --forward-to http://localhost:[APP_PORT]/api/stripe_webhook.php > /tmp/stripe_listen.log 2>&1 &
+STRIPE_LISTEN_PID=$!
+sleep 3
+```
+
+Parse the local webhook secret from the log:
+
+```bash
+LOCAL_SECRET=$(grep -o 'whsec_[A-Za-z0-9]*' /tmp/stripe_listen.log | head -1)
+```
+
+If `LOCAL_SECRET` is empty, the Stripe CLI is not installed or not authenticated. Skip to step 6 and note the skip in the final report.
+
+### 4. Temporarily swap in local secret
+
+Write `LOCAL_SECRET` to `.env` as `STRIPE_WEBHOOK_SECRET` so the running app can verify local test events.
+
+### 5. Fire test events and verify
+
+For each registered event type, run `stripe trigger [event]` and check docker logs for a `200` response from the webhook handler:
+
+```bash
+stripe trigger payment_intent.succeeded
+sleep 2
+docker logs [CONTAINER_NAME] --tail 20 2>&1 | grep "stripe_webhook"
+```
+
+Repeat for each event. Record pass/fail per event.
+
+If any event returns non-200 or the handler throws an error, note it in the Step 9 report — do not stop the build, as this may be expected if the app logic isn't fully wired yet.
+
+### 6. Stop listener and restore production secret
+
+```bash
+kill $STRIPE_LISTEN_PID 2>/dev/null
+rm -f /tmp/stripe_listen.log
+```
+
+Write the **production** signing secret from step 1 back to `.env` as `STRIPE_WEBHOOK_SECRET`.
 
 ---
 
@@ -149,6 +192,40 @@ If there are Critical, High, or Medium findings:
 
 ---
 
+## Step 8b: Pre-Completion Verification
+
+Use the `superpowers:verification-before-completion` skill, then answer every question below. Fix anything that is NO before proceeding to Step 9.
+
+### Features
+- [ ] Every feature listed in SEED.md is implemented — nothing silently skipped
+- [ ] All pages require auth where auth is expected (check `auth_required=True` on protected pages)
+- [ ] No placeholder, lorem ipsum, or hardcoded dummy data left in the app
+
+### Architecture (Golden Recipe compliance)
+- [ ] Every database table created via `execute_sql` — no schema defined inline in PHP
+- [ ] Every Model created via `create_model` or `scaffold_*` — no raw PDO in page files
+- [ ] Every form uses HTMX (`hx-post`, `hx-get`) — no custom `fetch()` or `axios` calls
+- [ ] `build_css` was run after all HTML edits — Tailwind classes are compiled
+- [ ] `run_linter` was run — no PHP syntax errors
+
+### Design
+- [ ] `uncodixify` skill was invoked before any UI work — rules were followed
+- [ ] No gradient hero sections, glassmorphism, or oversized rounded corners
+- [ ] Page titles are set correctly (`<title>App Name — Page Name</title>`)
+- [ ] Favicon is present (`/favicon.svg` already exists in the template)
+- [ ] App is usable on mobile (no fixed-width containers that break small screens)
+
+### External APIs
+- [ ] For every external API used (Stripe, OpenRouter, or any other), Context7 MCP was queried for current documentation before implementing — no guessed API signatures
+- [ ] Stripe: webhook handler validates signature with `STRIPE_WEBHOOK_SECRET` before processing any event
+- [ ] OpenRouter: model name is read from `.env` or a config constant — not hardcoded
+
+### Environment
+- [ ] Every env var the app reads at runtime exists in `env.example` with a comment
+- [ ] No secrets, API keys, or passwords hardcoded anywhere in `src/public/`
+
+---
+
 ## Step 9: Done
 
 Read `APP_PORT` from `.env` (default to `1234` if not set).
@@ -160,6 +237,9 @@ Tell the developer:
 > App running at: `http://localhost:[APP_PORT]`
 > Branch: `build/[app-name]`
 > Security report: `.security/SECURITY_REPORT.md`
+>
+> **Stripe webhooks:** [list each event and PASS/FAIL/SKIPPED]
+> Production webhook secret written to `.env`.
 >
 > Review the app. When satisfied:
 > - Run `/launch` to go live on your Cloudflare domain

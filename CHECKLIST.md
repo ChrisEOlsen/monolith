@@ -77,29 +77,6 @@ If Stripe is enabled, `/build` will register the production webhook and pause to
 
 ---
 
-## 💳 Testing Stripe Locally
-
-After `/build` completes, test the full payment flow locally using the Stripe CLI:
-
-```bash
-stripe listen --forward-to localhost:[APP_PORT]/api/stripe_webhook.php
-```
-
-This prints a **local** webhook secret (`whsec_...`). Temporarily swap it into `.env`:
-
-```
-STRIPE_WEBHOOK_SECRET=whsec_...(local one from stripe listen)
-```
-
-Trigger test events in a second terminal:
-
-```bash
-stripe trigger payment_intent.succeeded
-```
-
-When done testing locally, restore the **production** webhook secret (from `/build`) before running `/launch`.
-
----
 
 ## 🌐 Ready to Deploy
 
