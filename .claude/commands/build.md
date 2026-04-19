@@ -48,9 +48,11 @@ Use the `superpowers:brainstorming` skill.
 
 Pass the full contents of SEED.md as the starting context with this framing:
 
-> "The developer has filled in SEED.md (contents below). Use this as the starting context. The goal is to clarify any missing specifications or architectural decisions for this PHP monolith app before building. Follow the brainstorming process as normal — spec saved to docs/superpowers/specs/."
+> "The developer has filled in SEED.md (contents below). Use this as the starting context. The goal is to clarify any missing specifications or architectural decisions for this PHP monolith app before building. Follow the brainstorming process as normal — spec saved to docs/superpowers/specs/ (this path is gitignored intentionally; specs are local only)."
 
-Wait for the developer to approve the spec before continuing to Step 4.
+When the brainstorming skill reaches its "Transition to implementation" step — **stop there and do not execute it**. That transition is handled by this build workflow, not by the brainstorming skill.
+
+Present the completed spec to the developer and wait for explicit approval (e.g. "looks good", "approved", "continue"). Then proceed to Step 4.
 
 ---
 
