@@ -1,6 +1,6 @@
 ---
 description: Build a new PHP application from SEED.md — full automated workflow from spec to running app
-allowed-tools: Bash(cat .env), Bash(cat SEED.md), Bash(docker compose ps), Bash(docker compose up *), Bash(docker compose down *), Bash(docker logs *), Bash(git *), Bash(stripe *), Bash(kill *), Bash(sleep *), Bash(grep *), Bash(rm -f *)
+allowed-tools: Read, Write, Edit, MultiEdit, Bash(cat *), Bash(docker compose ps), Bash(docker compose up *), Bash(docker compose down *), Bash(docker logs *), Bash(docker exec *), Bash(git *), Bash(stripe *), Bash(kill *), Bash(sleep *), Bash(mkdir -p *), Bash(chmod *), Bash(rm -f *), mcp__php-monolith-builder__execute_sql, mcp__php-monolith-builder__scaffold_crud, mcp__php-monolith-builder__scaffold_list, mcp__php-monolith-builder__scaffold_auth, mcp__php-monolith-builder__scaffold_registration, mcp__php-monolith-builder__create_model, mcp__php-monolith-builder__create_page, mcp__php-monolith-builder__create_internal_api, mcp__php-monolith-builder__add_htmx_form, mcp__php-monolith-builder__build_css, mcp__php-monolith-builder__run_linter, mcp__stripe__*, mcp__context7__*
 ---
 
 ## Pre-loaded Context
@@ -69,7 +69,14 @@ Present the completed spec to the developer and wait for explicit approval (e.g.
 
 Use the `superpowers:writing-plans` skill.
 
-Input: the approved spec from Step 3. The plan should follow the Golden Recipe from CLAUDE.md (database first → scaffold with MCP tools → paint UI with uncodixify → polish with build_css).
+Input: the approved spec from Step 3. Follow these constraints to keep the plan lean and cost-effective:
+
+- **Tasks are MCP tool calls, not PHP code.** Each task step should be: `execute_sql(...)`, `scaffold_list(...)`, `create_model(...)`, `add_htmx_form(...)`, etc. — not hand-written PHP. The MCP tools generate the code; the plan just directs which tools to call with which arguments.
+- **Skip TDD steps.** This stack has no automated test suite. Replace test steps with: run `run_linter`, reload the page, verify the feature works visually.
+- **One task per feature.** Do not split a single CRUD feature across multiple tasks. DB + scaffold + form + CSS for one feature = one task.
+- Follow the Golden Recipe order: database first (`execute_sql`) → scaffold (`scaffold_*`, `create_model`, `create_page`) → UI (`add_htmx_form`, uncodixify) → compile (`build_css`).
+
+**Note:** Plan generation may take several minutes for complex projects. Do not interrupt it.
 
 ---
 
