@@ -23,7 +23,14 @@
       "Bash(chmod +x *)",
       "mcp__context7__resolve-library-id",
       "mcp__context7__query-docs",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(cp /Users/crispychris/Desktop/repos/ai-first-php-monolith/Dockerfile /Users/crispychris/Desktop/repos/pt-business/Dockerfile)",
+      "Bash(cp /Users/crispychris/Desktop/repos/ai-first-php-monolith/apache.conf /Users/crispychris/Desktop/repos/pt-business/apache.conf)",
+      "Bash(cp /Users/crispychris/Desktop/repos/ai-first-php-monolith/docker-compose.yml /Users/crispychris/Desktop/repos/pt-business/docker-compose.yml)",
+      "Bash(cp /Users/crispychris/Desktop/repos/ai-first-php-monolith/src/public/db.php /Users/crispychris/Desktop/repos/pt-business/src/public/db.php)",
+      "Bash(cp /Users/crispychris/Desktop/repos/ai-first-php-monolith/env.example /Users/crispychris/Desktop/repos/pt-business/env.example)",
+      "Bash(cp /Users/crispychris/Desktop/repos/ai-first-php-monolith/CHECKLIST.md /Users/crispychris/Desktop/repos/pt-business/CHECKLIST.md)",
+      "Bash(cp /Users/crispychris/Desktop/repos/ai-first-php-monolith/.gitignore /Users/crispychris/Desktop/repos/pt-business/.gitignore)"
     ]
   }
 }
