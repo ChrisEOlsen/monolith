@@ -8,15 +8,11 @@ You are running the deployment workflow. Only run this after the developer has r
 
 ## Step 1: Check Prerequisites
 
-Read `.env` and verify these vars exist and are non-empty:
+Read `.env` and verify `CLOUDFLARE_TUNNEL_TOKEN` exists and is non-empty.
 
-- `CLOUDFLARE_API_TOKEN`
-- `CLOUDFLARE_TUNNEL_TOKEN`
-- `CLOUDFLARE_DOMAIN`
+If missing, **STOP** and tell the developer:
 
-If any are missing, **STOP** and tell the developer:
-
-> "The following vars are missing from .env: [list them]. Add them and run /launch again."
+> "CLOUDFLARE_TUNNEL_TOKEN is missing from .env. Add it and run /launch again."
 
 ---
 
@@ -42,16 +38,7 @@ If the service already exists, skip this step.
 
 ---
 
-## Step 3: Cloudflare Tunnel
-
-Use the Cloudflare MCP server tools to:
-
-1. Create or configure a tunnel using `CLOUDFLARE_TUNNEL_TOKEN`
-2. Configure routing so that `CLOUDFLARE_DOMAIN` points to the tunnel → the local app
-
----
-
-## Step 4: Rebuild Containers
+## Step 3: Rebuild Containers
 
 Run:
 
@@ -63,7 +50,7 @@ Wait for the containers to come up cleanly before continuing.
 
 ---
 
-## Step 5: Knowledge Graph
+## Step 4: Knowledge Graph
 
 Use the `graphify` skill on `src/public/`.
 
@@ -71,13 +58,13 @@ This generates a navigable knowledge graph of the application codebase, suitable
 
 ---
 
-## Step 6: Report
+## Step 5: Report
 
 Tell the developer:
 
 > **Deployment complete.**
 >
-> Live at: `https://[CLOUDFLARE_DOMAIN]`
+> Tunnel is live — domain configured in Cloudflare dashboard.
 > Knowledge graph: `graphify-out/`
 >
 > Open `graphify-out/index.html` in a browser, or import the JSON into Obsidian.

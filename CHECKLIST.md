@@ -50,7 +50,7 @@ Do these every time you start a new project from this repo.
 
 - [ ] **Stripe** → add `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET` to `.env`
 - [ ] **OpenRouter** → add `OPENROUTER_API_KEY` to `.env`
-- [ ] **Cloudflare** (needed for `/launch`) → add `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_TUNNEL_TOKEN`, `CLOUDFLARE_DOMAIN` to `.env`
+- [ ] **Cloudflare** (needed for `/launch`) → add `CLOUDFLARE_TUNNEL_TOKEN` to `.env` (domain routing configured in CF dashboard, not here)
 
 ### 4. Start Docker
 
