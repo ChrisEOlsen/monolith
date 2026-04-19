@@ -29,6 +29,10 @@ command -v curl    >/dev/null 2>&1 || fail "curl not found"
 
 ok "python3, docker, git, curl all present"
 
+command -v stripe >/dev/null 2>&1 \
+    && ok "stripe CLI present" \
+    || warn "stripe CLI not found — install it for local webhook testing: https://stripe.com/docs/stripe-cli"
+
 # ── Read APP_NAME from .env (fall back to env.example, then default) ───────────
 ENV_FILE="$SCRIPT_DIR/.env"
 EXAMPLE_FILE="$SCRIPT_DIR/env.example"

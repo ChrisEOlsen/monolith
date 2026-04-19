@@ -7,6 +7,7 @@ Only do these once per server/machine. Skip if already done.
 
 - [ ] **Claude Code installed** — `npm install -g @anthropic-ai/claude-code`
 - [ ] **Docker installed and running**
+- [ ] **Stripe CLI installed** — [stripe.com/docs/stripe-cli](https://stripe.com/docs/stripe-cli) — needed for local webhook testing (`stripe listen`)
 - [ ] **Authenticate Stripe MCP** — open Claude Code, run `/mcp`, find the `stripe` server and follow the OAuth login prompt in your browser (one-time auth, persists across sessions)
 
 ---
@@ -30,7 +31,7 @@ Do these every time you start a new project from this repo.
   - `APP_NAME` — unique name, determines Docker container name and MCP config
   - `APP_PORT`, `DB_PORT` — unique ports (avoid conflicts if running multiple projects)
   - `DB_DATABASE`, `DB_USER`, `DB_PASSWORD`, `DB_ROOT_PASSWORD`
-  - `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET` — if using Stripe
+  - `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY` — if using Stripe (`STRIPE_WEBHOOK_SECRET` generated during `/build`)
   - `OPENROUTER_API_KEY` — if using OpenRouter
   - `CLOUDFLARE_TUNNEL_TOKEN`, `APP_DOMAIN` — if deploying via `/launch`
 
@@ -70,6 +71,32 @@ Once all boxes are checked:
 ```
 
 Claude will read `SEED.md`, verify your `.env`, then start the brainstorming session.
+
+If Stripe is enabled, `/build` will register the production webhook and pause to give you the `STRIPE_WEBHOOK_SECRET`. Add it to `.env` when prompted.
+
+---
+
+## 💳 Testing Stripe Locally
+
+After `/build` completes, test the full payment flow locally using the Stripe CLI:
+
+```bash
+stripe listen --forward-to localhost:[APP_PORT]/api/stripe_webhook.php
+```
+
+This prints a **local** webhook secret (`whsec_...`). Temporarily swap it into `.env`:
+
+```
+STRIPE_WEBHOOK_SECRET=whsec_...(local one from stripe listen)
+```
+
+Trigger test events in a second terminal:
+
+```bash
+stripe trigger payment_intent.succeeded
+```
+
+When done testing locally, restore the **production** webhook secret (from `/build`) before running `/launch`.
 
 ---
 
