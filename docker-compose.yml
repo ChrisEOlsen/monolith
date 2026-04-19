@@ -17,6 +17,8 @@ services:
       - DB_NAME=${DB_DATABASE}
       - DB_USER=${DB_USER}
       - DB_PASS=${DB_PASSWORD}
+      - APP_TIMEZONE=${APP_TIMEZONE:-UTC}
+      - TZ=${APP_TIMEZONE:-UTC}
     networks:
       - default
 
@@ -31,6 +33,7 @@ services:
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      TZ: ${APP_TIMEZONE:-UTC}
     volumes:
       - db_data:/var/lib/mysql
     networks:

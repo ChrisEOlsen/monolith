@@ -29,6 +29,7 @@ Do these every time you start a new project from this repo.
   ```
   Set all values that apply:
   - `APP_NAME` — unique name, determines Docker container name and MCP config
+  - `APP_TIMEZONE` — e.g. `America/New_York`, `Europe/London` (defaults to `UTC`)
   - `APP_PORT`, `DB_PORT` — unique ports (avoid conflicts if running multiple projects)
   - `DB_DATABASE`, `DB_USER`, `DB_PASSWORD`, `DB_ROOT_PASSWORD`
   - `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY` — if using Stripe (`STRIPE_WEBHOOK_SECRET` generated during `/build`)

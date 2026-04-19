@@ -18,8 +18,7 @@ $user = getenv('DB_USER') ?: 'user';
 $pass = getenv('DB_PASS') ?: 'password';
 $charset = 'utf8mb4';
 
-// Set Timezone (Default to EST/EDT for this user)
-date_default_timezone_set(getenv('APP_TIMEZONE') ?: 'America/New_York');
+date_default_timezone_set(getenv('APP_TIMEZONE') ?: 'UTC');
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
 $options = [
