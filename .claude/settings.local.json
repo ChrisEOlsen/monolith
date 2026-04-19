@@ -18,7 +18,11 @@
       "Bash(python3 -c \"import graphify\")",
       "Bash(pip install:*)",
       "Bash(python3:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(git commit -m ' *)",
+      "Bash(chmod +x *)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs"
     ]
   }
 }

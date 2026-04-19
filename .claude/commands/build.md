@@ -32,9 +32,11 @@ If `.env` exists, check that each required var is present AND non-empty based on
 
 | Integration checked | Required vars |
 |---------------------|--------------|
-| `[x] Payments (Stripe)` | `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET` |
+| `[x] Payments (Stripe)` | `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY` |
 | `[x] AI Features (OpenRouter)` | `OPENROUTER_API_KEY` |
-| `[x] Public domain (Cloudflare)` | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_TUNNEL_TOKEN`, `CLOUDFLARE_DOMAIN` |
+| `[x] Public domain (Cloudflare)` | `CLOUDFLARE_TUNNEL_TOKEN` |
+
+Note: `STRIPE_WEBHOOK_SECRET` is generated during Step 6b — do not require it here.
 
 If any required var is missing or empty, **STOP** and list exactly which vars need to be filled in. Do not continue until the developer confirms they have been added.
 
@@ -86,6 +88,40 @@ Provide subagents with this mandatory context:
 > - All tool calls are pre-authorized. Do not stop for permission prompts.
 
 When all tasks are complete, ensure all worktree changes are merged to the feature branch.
+
+---
+
+## Step 6b: Stripe Webhook Registration (only if Stripe checked)
+
+Skip this step if `[x] Payments (Stripe)` was not checked in SEED.md.
+
+Use the Stripe MCP to register a webhook endpoint pointing at:
+
+```
+https://[APP_DOMAIN]/api/stripe_webhook.php
+```
+
+Read `APP_DOMAIN` from `.env`.
+
+Register for these events at minimum (add more if the app spec requires):
+- `payment_intent.succeeded`
+- `payment_intent.payment_failed`
+- `customer.subscription.updated`
+- `customer.subscription.deleted`
+
+After registration, Stripe will return a webhook signing secret. **STOP** and tell the developer:
+
+> "Stripe webhook registered. Add the production signing secret to your `.env`:
+>
+> ```
+> STRIPE_WEBHOOK_SECRET=whsec_...
+> ```
+>
+> **For local testing before launch:** run `stripe listen --forward-to localhost:[APP_PORT]/api/stripe_webhook.php` in a separate terminal — it prints a different local secret. Swap that into `.env` while testing locally, then restore the production secret before running `/launch`.
+>
+> Confirm once `.env` is updated to continue."
+
+Wait for developer confirmation before proceeding to Step 7.
 
 ---
 
