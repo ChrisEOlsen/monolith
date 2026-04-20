@@ -30,7 +30,8 @@
       "Bash(cp /Users/crispychris/Desktop/repos/ai-first-php-monolith/src/public/db.php /Users/crispychris/Desktop/repos/pt-business/src/public/db.php)",
       "Bash(cp /Users/crispychris/Desktop/repos/ai-first-php-monolith/env.example /Users/crispychris/Desktop/repos/pt-business/env.example)",
       "Bash(cp /Users/crispychris/Desktop/repos/ai-first-php-monolith/CHECKLIST.md /Users/crispychris/Desktop/repos/pt-business/CHECKLIST.md)",
-      "Bash(cp /Users/crispychris/Desktop/repos/ai-first-php-monolith/.gitignore /Users/crispychris/Desktop/repos/pt-business/.gitignore)"
+      "Bash(cp /Users/crispychris/Desktop/repos/ai-first-php-monolith/.gitignore /Users/crispychris/Desktop/repos/pt-business/.gitignore)",
+      "Skill(build)"
     ]
   }
 }

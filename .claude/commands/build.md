@@ -75,6 +75,7 @@ Input: the approved spec from Step 3. Follow these constraints to keep the plan 
 - **Skip TDD steps.** This stack has no automated test suite. Replace test steps with: run `run_linter`, reload the page, verify the feature works visually.
 - **One task per feature.** Do not split a single CRUD feature across multiple tasks. DB + scaffold + form + CSS for one feature = one task.
 - Follow the Golden Recipe order: database first (`execute_sql`) → scaffold (`scaffold_*`, `create_model`, `create_page`) → UI (`add_htmx_form`, uncodixify) → compile (`build_css`).
+- **CRUD completeness (critical).** For every entity that has a creation form in the UI, explicitly plan edit AND delete actions too. Never plan create-only UI. Ask: "Can the user fix a mistake?" and "Can the user remove this?" — if no, add those operations to the task. Admin dashboards especially must have inline edit/delete on every managed resource. The only exception is append-only data (logs, audit trails, chat messages) where mutation is intentionally prohibited by the spec.
 
 **Note:** Plan generation may take several minutes for complex projects. Do not interrupt it.
 
@@ -218,6 +219,7 @@ Use the `superpowers:verification-before-completion` skill, then answer every qu
 - [ ] Every feature listed in SEED.md is implemented — nothing silently skipped
 - [ ] All pages require auth where auth is expected (check `auth_required=True` on protected pages)
 - [ ] No placeholder, lorem ipsum, or hardcoded dummy data left in the app
+- [ ] **CRUD completeness:** For every entity with a creation form, there is also an edit action AND a delete action in the UI — unless the spec explicitly marks it as append-only (logs, audit trails, messages). If either is missing, implement it before proceeding.
 
 ### Architecture (Golden Recipe compliance)
 - [ ] Every database table created via `execute_sql` — no schema defined inline in PHP
