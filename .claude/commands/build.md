@@ -134,6 +134,7 @@ Provide subagents with this mandatory context:
 > - Before any frontend or design work, invoke the `uncodixify` skill. Follow its rules exactly.
 > - For any external API integrations (Stripe, OpenRouter, Cloudflare, etc.), use the context7 MCP to fetch current documentation before implementing.
 > - All tool calls are pre-authorized. Do not stop for permission prompts.
+> - Redis is pre-wired. Models extending BaseModel get automatic query caching — do not add manual Redis calls to model methods. Fragment caching is automatic on all GET API endpoints — do not add a second cache layer. Only use `$redis` directly for queues, rate-limiting, or pub/sub features explicitly in the spec.
 
 When all tasks are complete, ensure all worktree changes are merged to the feature branch.
 
