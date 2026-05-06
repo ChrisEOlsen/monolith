@@ -1,10 +1,8 @@
-# Base image: PHP 8.2 with Apache
-FROM php:8.2-apache
+FROM php:8.2-fpm
 
-# Set working directory
 WORKDIR /var/www/html
 
-# 1. Install System Dependencies (Python, git, zip, etc.)
+# 1. System dependencies
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
@@ -13,44 +11,38 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libzip-dev \
     default-mysql-client \
+    nginx \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Install PHP Extensions
+# 2. PHP extensions
 RUN docker-php-ext-install pdo pdo_mysql mysqli zip
 
-# 3. Install 'uv' (The Python Package Manager)
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+# 3. phpredis
+RUN pecl install redis && docker-php-ext-enable redis
 
-# 4. Install Tailwind CLI (Standalone)
-# We download the linux-x64 binary and make it executable
+# 4. OPcache (bundled with PHP — just enable and configure)
+RUN docker-php-ext-enable opcache
+COPY opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+
+# 5. Tailwind CLI
 RUN curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64 \
     && chmod +x tailwindcss-linux-x64 \
     && mv tailwindcss-linux-x64 /usr/local/bin/tailwindcss
 
-# 5. Apache Configuration
-COPY apache.conf /etc/apache2/sites-available/000-default.conf
-RUN a2enmod rewrite
+# 6. uv (Python package manager)
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
-# 6. User Permissions (Match Host User)
+# 7. User permissions (match host UID/GID)
 ARG UID=1000
 ARG GID=1000
-
-# Update www-data to match the host user's UID/GID
-# We use usermod/groupmod to change the existing user instead of creating a new one
 RUN usermod -u ${UID} www-data && groupmod -g ${GID} www-data
 
-# 7. Python Environment for MCP Builder
-# Create a virtual environment and install dependencies
+# 8. Python environment for MCP builder
 RUN python3 -m venv /opt/builder_venv
 ENV PATH="/opt/builder_venv/bin:$PATH"
-
-# Install Python dependencies for the builder
-# We assume these are needed for mcp_server.py
 RUN uv pip install fastmcp jinja2 mysql-connector-python
 
-# 7. Permissions
-# Ensure www-data owns the web root
+# 9. Permissions
 RUN chown -R www-data:www-data /var/www/html
 
-EXPOSE 80
-
+EXPOSE 9000
