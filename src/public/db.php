@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/session.php';
 
 // Secure Session Configuration
 if (session_status() === PHP_SESSION_NONE) {
