@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../csrf.php';
+require_once __DIR__ . '/../redis.php';
+require_once __DIR__ . '/../cache.php';
 
 // 1. Authentication Check
 {% if auth_required %}
@@ -35,8 +37,20 @@ if (!verify_csrf_token($token)) {
 // 4. Model Logic
 {% for model in models %}
 require_once __DIR__ . '/../classes/{{ model }}.php';
-${{ model | lower }}Model = new {{ model }}($pdo);
+${{ model | lower }}Model = new {{ model }}($pdo, $redis);
 {% endfor %}
+
+// 5. Fragment cache (GET only)
+{% if method == 'GET' %}
+$_fragmentCache = new Cache($redis);
+$_fragmentKey = 'fragment:' . md5($_SERVER['REQUEST_URI']);
+$_cached = $_fragmentCache->get($_fragmentKey);
+if ($_cached !== null) {
+    echo $_cached;
+    exit;
+}
+ob_start();
+{% endif %}
 
 try {
     // TODO: Implement your HTMX logic here.
@@ -49,6 +63,16 @@ try {
     <?php
 
 } catch (Exception $e) {
+    {% if method == 'GET' %}
+    ob_end_clean();
+    {% endif %}
     http_response_code(500);
     echo '<div class="text-red-500">Error: ' . htmlspecialchars($e->getMessage()) . '</div>';
+    exit;
 }
+
+{% if method == 'GET' %}
+$_output = ob_get_clean();
+$_fragmentCache->set($_fragmentKey, $_output);
+echo $_output;
+{% endif %}
