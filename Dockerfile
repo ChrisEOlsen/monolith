@@ -19,7 +19,8 @@ RUN docker-php-ext-install pdo pdo_mysql mysqli zip
 # 3. phpredis
 RUN pecl install redis && docker-php-ext-enable redis
 
-# OPcache is enabled by default in php:8.2-fpm. opcache.ini config is COPY'd in Task 2.
+# OPcache is enabled by default in php:8.2-fpm — copy config to apply tuning settings
+COPY opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 
 # 5. Tailwind CLI
 RUN curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64 \
