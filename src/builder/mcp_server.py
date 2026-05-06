@@ -181,34 +181,46 @@ def scaffold_list(name: str, fields: List[str]):
     api_content = f"""<?php
 require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../csrf.php';
+require_once __DIR__ . '/../redis.php';
+require_once __DIR__ . '/../cache.php';
 
-# Auth Check
+// Auth Check
 if (session_status() === PHP_SESSION_NONE) session_start();
 if (!isset($_SESSION['user_id'])) {{ http_response_code(401); exit; }}
 
 require_once __DIR__ . '/../classes/{pascal_name}.php';
-${name}Model = new {pascal_name}($pdo);
+${name}Model = new {pascal_name}($pdo, $redis);
+
+$_fragmentCache = new Cache($redis);
+$_fragmentKey = 'fragment:' . md5($_SERVER['REQUEST_URI']);
+$_cached = $_fragmentCache->get($_fragmentKey);
+if ($_cached !== null) {{ echo $_cached; exit; }}
+ob_start();
 
 try {{
-    # Fetch Data
-    $items = ${name}Model->getAll(); 
-    
+    $items = ${name}Model->getAll();
+
     echo '<ul id="{name}-ul" class="space-y-2">';
     if (empty($items)) {{
         echo '<li class="text-gray-500 italic">No {plural_name} found.</li>';
     }} else {{
         foreach ($items as $item) {{
             echo '<li class="p-3 bg-white shadow rounded flex justify-between border border-gray-100">';
-            # Display the first non-id field
             echo '<span class="font-medium">' . htmlspecialchars(array_values($item)[1] ?? 'Item') . '</span>';
             echo '</li>';
         }}
     }}
     echo '</ul>';
 }} catch (Exception $e) {{
+    ob_end_clean();
     http_response_code(500);
     echo 'Error loading data.';
+    exit;
 }}
+
+$_output = ob_get_clean();
+$_fragmentCache->set($_fragmentKey, $_output);
+echo $_output;
 """
     os.makedirs(os.path.join(PUBLIC_DIR, "api"), exist_ok=True)
     with open(os.path.join(PUBLIC_DIR, "api", api_filename), "w") as f:

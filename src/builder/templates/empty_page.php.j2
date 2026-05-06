@@ -19,9 +19,12 @@ if (!isset($_SESSION['user_id'])) {
 {% endif %}
 
 // Include requested models
+{% if models %}
+require_once 'redis.php';
+{% endif %}
 {% for model in models %}
 require_once 'classes/{{ model }}.php';
-${{ model | lower }}Model = new {{ model }}($pdo);
+${{ model | lower }}Model = new {{ model }}($pdo, $redis);
 {% endfor %}
 
 // Page Logic
