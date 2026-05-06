@@ -26,6 +26,9 @@ graphify-out
 docs/
 future-upgrades.md
 
+# Git worktrees — local only
+.worktrees/
+
 # Obsidian vault config — local only
 .obsidian/
 
