@@ -1,4 +1,6 @@
 [mysqld]
+; innodb_buffer_pool_size is overwritten at build time to 10% of system RAM.
+; The 128M below is a static fallback only — do not tune this manually.
 slow_query_log = 1
 long_query_time = 1
 innodb_flush_log_at_trx_commit = 2
