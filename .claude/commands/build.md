@@ -58,7 +58,11 @@ Calculate 10% of total system RAM and write it into `mysql.cnf` before container
 Run:
 
 ```bash
-TOTAL_RAM=$(free -m | awk '/^Mem:/{print $2}')
+if command -v free >/dev/null 2>&1; then
+  TOTAL_RAM=$(free -m | awk '/^Mem:/{print $2}')
+else
+  TOTAL_RAM=$(( $(sysctl -n hw.memsize) / 1024 / 1024 ))
+fi
 BUFFER_POOL=$((TOTAL_RAM / 10))
 cat > mysql.cnf << EOF
 [mysqld]
