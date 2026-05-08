@@ -55,14 +55,16 @@ Adds a Cloudflare tunnel container to your stack, rebuilds, and generates a know
 
 | Layer | Technology |
 |-------|-----------|
-| Runtime | PHP 8.2 + Apache |
-| Database | MySQL 8.0 (PDO prepared statements only) |
+| Web server | Nginx (reverse proxy, separate container) |
+| Runtime | PHP 8.2-FPM + OPcache |
+| Cache / Sessions | Redis 7 (query cache, fragment cache, session store) |
+| Database | MySQL 8.0 (PDO prepared statements only, auto-tuned InnoDB buffer) |
 | Frontend | HTMX + Alpine.js + Tailwind CSS |
 | Code Generator | Python + FastMCP + Jinja2 (inside the container) |
 | Admin | phpMyAdmin |
 | Deployment | Cloudflare Tunnel (zero port forwarding) |
 
-**No Node.js. No build steps. No hydration. No CORS. Write a file, Apache serves it.**
+**No Node.js. No build steps. No hydration. No CORS. Write a file, Nginx + PHP-FPM serves it.**
 
 ---
 
@@ -90,7 +92,12 @@ ai-first-php-monolith/
 │   ├── builder/          # AI's workshop — Python MCP server + Jinja2 templates
 │   │   ├── mcp_server.py
 │   │   └── templates/    # "Golden Templates": enforce security, architecture, naming
-│   └── public/           # Live application — PHP + HTML served by Apache
+│   └── public/           # Live application — PHP served by PHP-FPM
+│       ├── classes/
+│       │   └── BaseModel.php  # Auto query-cache via Redis (getAll/update/delete)
+│       ├── redis.php     # Singleton $redis connection
+│       ├── cache.php     # Cache helper (get/set/bust)
+│       ├── session.php   # Redis session handler (wired into db.php)
 │       └── index.php
 ├── .claude/
 │   ├── commands/
@@ -99,13 +106,16 @@ ai-first-php-monolith/
 │   │   └── security/
 │   │       └── analyze.md # two-pass SAST
 │   └── settings.local.json
+├── nginx.conf            # Nginx reverse proxy config
+├── opcache.ini           # OPcache tuning (copied into container)
+├── mysql.cnf             # InnoDB buffer pool (overwritten at build time)
 ├── docker-compose.yml
 ├── SEED.md               # Describe your app here
 ├── CHECKLIST.md          # Setup checklist
 └── install.sh            # One-command machine setup
 ```
 
-The `builder/` directory sits outside Apache's `DocumentRoot`. The internet cannot access the templates or MCP server — only the generated files in `public/` are served.
+`builder/` sits outside Nginx's document root. The internet cannot access templates or the MCP server — only generated files in `public/` are served.
 
 ---
 
