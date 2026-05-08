@@ -1,4 +1,4 @@
-# Modern PHP Monolith — AI-Second
+# PHP Monolith: AI-Second
 
 A self-replicating PHP application factory driven by Claude Code. Describe what you want to build in `SEED.md`, run `/build`, and an orchestrated AI workflow handles the rest — database design, scaffolding, UI, security analysis, and deployment.
 
