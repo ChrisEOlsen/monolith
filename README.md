@@ -14,7 +14,7 @@ That's the peace of mind. The AI is second. The structure comes first.
 
 **Other benefits:**
 
-- **~300 tokens** to understand any feature vs. 2,000+ in a Next.js/FastAPI stack
+- **~1,000 tokens** to understand any feature vs. 3,000-5,000+ in a Next.js/FastAPI stack
 - **No structural code written from scratch** — Jinja2 templates enforce architecture, PDO, and security patterns
 - **25 years of PHP training data** — LLMs write correct PHP/SQL on the first attempt, reliably
 - **One file = one feature** — controller logic at the top, HTML at the bottom, no client/server state sync
