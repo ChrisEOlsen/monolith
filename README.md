@@ -1,4 +1,4 @@
-# Modern PHP Monolith — AI-First Project Factory
+# Modern PHP Monolith — AI-Second
 
 A self-replicating PHP application factory driven by Claude Code. Describe what you want to build in `SEED.md`, run `/build`, and an orchestrated AI workflow handles the rest — database design, scaffolding, UI, security analysis, and deployment.
 
@@ -6,16 +6,18 @@ A self-replicating PHP application factory driven by Claude Code. Describe what 
 
 ## The Core Idea
 
-Most AI-assisted dev stacks fight the AI. Thousands of tokens spent on framework boilerplate, hydration edge cases, and type glue before a single line of product logic gets written.
+Most AI-assisted dev stacks hand the AI a blank canvas and hope for the best. The result is insecure boilerplate, inconsistent architecture, and a developer left auditing code they didn't write and don't fully trust.
 
-This stack is designed *for* LLMs:
+This stack flips the order. The important structural code — security patterns, PDO bindings, session handling, caching, controller/view separation — is **prewritten first** using Jinja2 templates. The AI never invents that layer. It uses the templates as lego blocks via MCP, snapping them together to build features on top of a foundation you already trust.
+
+That's the peace of mind. The AI is second. The structure comes first.
+
+**Other benefits:**
 
 - **~300 tokens** to understand any feature vs. 2,000+ in a Next.js/FastAPI stack
 - **No structural code written from scratch** — Jinja2 templates enforce architecture, PDO, and security patterns
 - **25 years of PHP training data** — LLMs write correct PHP/SQL on the first attempt, reliably
 - **One file = one feature** — controller logic at the top, HTML at the bottom, no client/server state sync
-
-The AI doesn't scaffold around your stack. The stack is built for the AI.
 
 ---
 
