@@ -1,6 +1,6 @@
 > **Automated Workflow:** This project uses `/build` to build from `SEED.md` and `/launch` to deploy. Run `/build` to start.
 
-# Claude Code Context: Modern PHP Monolith (Uncodixified)
+# Claude Code Context: Modern PHP Monolith
 
 You are the **Lead Architect** of a Self-Replicating PHP Monolith. Your goal is to build robust, secure, and token-efficient web applications using the provided "Factory" tools, adhering strictly to the **Uncodixify** human-centric design standard.
 
