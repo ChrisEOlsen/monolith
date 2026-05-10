@@ -31,27 +31,7 @@
       "Bash(cp /Users/crispychris/Desktop/repos/ai-first-php-monolith/env.example /Users/crispychris/Desktop/repos/pt-business/env.example)",
       "Bash(cp /Users/crispychris/Desktop/repos/ai-first-php-monolith/CHECKLIST.md /Users/crispychris/Desktop/repos/pt-business/CHECKLIST.md)",
       "Bash(cp /Users/crispychris/Desktop/repos/ai-first-php-monolith/.gitignore /Users/crispychris/Desktop/repos/pt-business/.gitignore)",
-      "Skill(build)",
-      "Bash(pip3 install *)",
-      "Bash(/tmp/j2venv/bin/pip install *)",
-      "Bash(/tmp/j2venv/bin/python3 -c ' *)",
-      "Bash(mkdir -p /Users/crispychris/Desktop/repos/gotha-monolith/docs/superpowers/specs)",
-      "Bash(git commit *)",
-      "Bash(git -C /Users/crispychris/Desktop/repos/gotha-monolith status --short)",
-      "Bash(git -C /Users/crispychris/Desktop/repos/gotha-monolith add install.sh .claude/settings.local.json)",
-      "Bash(git -C /Users/crispychris/Desktop/repos/gotha-monolith commit -m \"feat: add install.sh and pre-authorized permissions for GOTHA MCP tools\")",
-      "Bash(git -C /Users/crispychris/Desktop/repos/gotha-monolith add SEED.md README.md CHECKLIST.md)",
-      "Bash(git -C /Users/crispychris/Desktop/repos/gotha-monolith commit -m \"docs: add SEED.md template, README, and setup checklist\")",
-      "Bash(mkdir -p /Users/crispychris/Desktop/repos/gotha-monolith/.claude/skills/uncodixify-gotha)",
-      "Bash(git -C /Users/crispychris/Desktop/repos/gotha-monolith add .claude/skills/)",
-      "Bash(git -C /Users/crispychris/Desktop/repos/gotha-monolith commit -m \"feat: add GOTHA-specific uncodixify skill for Templ+HTMX+Alpine design system\")",
-      "Bash(git -C /Users/crispychris/Desktop/repos/gotha-monolith log --oneline -8)",
-      "Bash(rm -rf /Users/crispychris/Desktop/repos/gotha-monolith/.claude/skills/uncodixify-gotha && echo \"deleted\")"
-    ],
-    "additionalDirectories": [
-      "/Users/crispychris/Desktop/repos/gotha-monolith/docs/superpowers",
-      "/Users/crispychris/Desktop/repos/gotha-monolith/.claude/skills",
-      "/Users/crispychris/Desktop/repos/gotha-monolith/.claude/skills/uncodixify-gotha"
+      "Skill(build)"
     ]
   }
 }
